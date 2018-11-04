@@ -1,11 +1,18 @@
 Proposal
 ================
-Tiffany Xi
 11/4/2018
 
 ### The group members (names and UNIs)
 
-Tian Li (tl2882) Huaqing Xi(hx2263) Shuwei Liu (sl4471) Yueming Kou (yk2826) Yizhi Ma (ym2715)
+Tian Li (tl2882)
+
+Huaqing Xi(hx2263)
+
+Shuwei Liu (sl4471)
+
+Yueming Kou (yk2826)
+
+Yizhi Ma (ym2715)
 
 ### The tentative project title
 
@@ -29,7 +36,25 @@ how to organize the original big data how to convert neighbourhood variable into
 
 ### The planned timeline
 
-Nov.12 Finish in-person meeting Nov.13 Find some related works and learn Nov.14 Set the plans Nov.17 Data cleaning and wrangling Nov.18 Initial visualization and research relevent supplement data Nov.23 Shiny？ Nov.30 Finish written report with detailed project description Dec.02 Write webpage Dec.04 Finish speech draft and record screencast Dec.06 DDL!
+Nov.12 Finish in-person meeting
+
+Nov.13 Find some related works and learn
+
+Nov.14 Set the plans
+
+Nov.17 Data cleaning and wrangling
+
+Nov.18 Initial visualization and research relevent supplement data
+
+Nov.23 Shiny？
+
+Nov.30 Finish written report with detailed project description
+
+Dec.02 Write webpage
+
+Dec.04 Finish speech draft and record screencast
+
+Dec.06 DDL!
 
 ### Data discription:
 
