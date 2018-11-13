@@ -1,0 +1,52 @@
+---
+title: "plot_color"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tigris)
+library(dplyr)
+library(leaflet)
+library(sp)
+library(ggmap)
+library(maptools)
+library(broom)
+library(httr)
+library(rgdal)
+```
+
+```{r}
+r = GET('http://data.beta.nyc//dataset/0ff93d2d-90ba-457c-9f7e-39e47bf2ac5f/resource/35dd04fb-81b3-479b-a074-a27a37888ce7/download/d085e2f8d0b54d4590b1e7d1f35594c1pediacitiesnycneighborhoods.geojson')
+nyc_neighborhoods = readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+summary(nyc_neighborhoods)
+
+nyc_neighborhoods_df <- tidy(nyc_neighborhoods)
+
+leaflet(nyc_neighborhoods) %>%
+  addTiles() %>% 
+  addPolygons(popup = ~neighborhood) %>%
+  addProviderTiles("CartoDB.Positron")
+
+## add points
+
+data_hiv = read.csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(hiv_diagnoses = as.numeric(hiv_diagnoses))
+
+points_by_neighborhood <- data_hiv %>%
+  group_by(uhf) %>%
+  summarize(num_points = sum(hiv_diagnoses)) %>% 
+  filter(uhf != "All")
+
+map_data = geo_join(nyc_neighborhoods, points_by_neighborhood, "neighborhood", "uhf")
+
+pal = colorNumeric(palette = "RdBu", domain = range(map_data@data$num_points, na.rm=T))
+
+leaflet(map_data) %>%
+  addTiles() %>% 
+  addPolygons(fillColor = ~pal(num_points), popup = ~neighborhood) %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(-73.98, 40.75, zoom = 13)
+```
+
