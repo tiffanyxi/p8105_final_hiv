@@ -16,6 +16,15 @@ hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
   rename(neighborhood = uhf) %>% 
   filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
   mutate(year = as.character(year), age = as.factor(age))
-hiv_data
+hiv_data 
+```
+
+```{r}
+hiv_data %>% 
+  group_by(neighborhood, gender) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(x = reorder(neighborhood, sum_hiv), y = sum_hiv, color = gender)) + 
+  coord_flip() +
+  geom_point() 
 ```
 
