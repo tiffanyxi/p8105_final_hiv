@@ -1,0 +1,21 @@
+---
+title: "Visualization"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+theme_set(theme_bw() + theme(legend.position = "bottom"))
+```
+
+First, import and tidy data:
+
+```{r message=FALSE}
+hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>% 
+  janitor::clean_names() %>% 
+  rename(neighborhood = uhf) %>% 
+  filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
+  mutate(year = as.character(year), age = as.factor(age))
+hiv_data
+```
+
