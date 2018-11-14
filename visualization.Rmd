@@ -1,11 +1,12 @@
 ---
 title: "Visualization"
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-theme_set(theme_bw() + theme(legend.position = "bottom"))
+theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5)))
+library(plotly)
 ```
 
 First, import and tidy data:
@@ -16,15 +17,60 @@ hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
   rename(neighborhood = uhf) %>% 
   filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
   mutate(year = as.character(year), age = as.factor(age))
-hiv_data 
 ```
 
-```{r}
-hiv_data %>% 
+gender neighborhood VS hiv
+
+```{r fig.width = 8, fig.height = 6}
+neb_plot = hiv_data %>% 
   group_by(neighborhood, gender) %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(x = reorder(neighborhood, sum_hiv), y = sum_hiv, color = gender)) + 
   coord_flip() +
-  geom_point() 
+  geom_point() +
+  labs(
+        title = "Gender and Neighborhood Influence on HIV Incidence",
+        x = "HIV diagnoses",
+        y = "Neighborhood",
+        caption = "Data from the ..."
+      )
+
+ggplotly(neb_plot)
+```
+
+```{r fig.width = 8, fig.height = 6}
+age_plot = hiv_data %>% 
+  filter(age != "All") %>% 
+  group_by(gender, age) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(y = sum_hiv, x = age, fill = gender)) + 
+  geom_bar(stat="identity", alpha = 0.8, position=position_dodge()) +
+  scale_fill_brewer(palette="Dark2") +
+  labs(
+        title = "Gender and Age Influence on HIV Incidence",
+        x = "Age range",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+
+ggplotly(age_plot)
+```
+
+```{r fig.width = 8, fig.height = 6}
+race_plot = hiv_data %>% 
+  filter(race != "All") %>% 
+  group_by(gender, race) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(y = sum_hiv, x = reorder(race, sum_hiv), fill = gender)) + 
+  geom_bar(stat="identity", alpha = 0.8, position=position_dodge()) +
+  scale_fill_manual(values=c("#E69F00", "#56B4E9")) +
+  labs(
+        title = "Race and Gender Influence on HIV Incidence",
+        x = "Race",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+
+ggplotly(race_plot)
 ```
 

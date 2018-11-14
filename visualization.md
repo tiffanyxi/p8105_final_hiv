@@ -32,13 +32,61 @@ hiv_data
     ## #   percent_viral_suppression <int>, deaths <int>, death_rate <dbl>,
     ## #   hiv_related_death_rate <dbl>, non_hiv_related_death_rate <dbl>
 
+gender neighborhood VS hiv
+
 ``` r
 hiv_data %>% 
   group_by(neighborhood, gender) %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(x = reorder(neighborhood, sum_hiv), y = sum_hiv, color = gender)) + 
   coord_flip() +
-  geom_point() 
+  geom_point() +
+  labs(
+        title = "Gender and Neighborhood Influence on HIV Incidence",
+        x = "HIV diagnoses",
+        y = "Neighborhood",
+        caption = "Data from the ..."
+      ) 
 ```
 
 ![](visualization_files/figure-markdown_github/unnamed-chunk-2-1.png)
+
+``` r
+hiv_data %>% 
+  filter(age != "All") %>% 
+  group_by(gender, age) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(y = sum_hiv, x = age, fill = gender)) + 
+  geom_bar(stat="identity", alpha = 0.8, position=position_dodge()) +
+  geom_text(aes(label=sum_hiv), vjust=1.6, color="white",
+            position = position_dodge(0.9), size=2.5) +
+  scale_fill_brewer(palette="Dark2") +
+  labs(
+        title = "Gender and Age Influence on HIV Incidence",
+        x = "Age range",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+```
+
+![](visualization_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+``` r
+hiv_data %>% 
+  filter(race != "All") %>% 
+  group_by(gender, race) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(y = sum_hiv, x = reorder(race, sum_hiv), fill = gender)) + 
+  geom_bar(stat="identity", alpha = 0.8, position=position_dodge()) +
+  geom_text(aes(label=sum_hiv), vjust=1.6, color="white",
+            position = position_dodge(0.9), size=2.6) +
+  scale_fill_manual(values=c("#E69F00", "#56B4E9")) +
+  labs(
+        title = "Race and Gender Influence on HIV Incidence",
+        x = "Race",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+```
+
+![](visualization_files/figure-markdown_github/unnamed-chunk-4-1.png)
