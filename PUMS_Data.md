@@ -5,10 +5,17 @@ Yizhi Ma
 
 ``` r
 pums_data = read.csv("./data/selected_pums.csv")
+puma10 = read.csv("./data/2010_PUMA_Names_NYC.csv")
 ```
 
 Current Problems
 ----------------
+
+tranfer PUMA10 code into locations.(Ref. found)
+
+match PUMA names with the location in the HIV dataset.
+
+cannot find name files for PUMA00.
 
 Column names meaning
 --------------------
@@ -41,3 +48,5 @@ RAC3P12 --
 Recoded detailed race code for data collected in 2012 or later
 
 For more info, you can check the data dictionarty "<https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2011-2015.pdf?#>"
+
+Data from The ACS Public Use Microdata Sample files (PUMS), u can find it here "<https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=ACS_pums_csv_2011_2015&prodType=document>"
