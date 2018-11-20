@@ -11,7 +11,7 @@ library(plotly)
 
 First, import and tidy data:
 
-```{r message=FALSE}
+```{r message=FALSE, echo = FALSE}
 hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>% 
   janitor::clean_names() %>% 
   rename(neighborhood = uhf) %>% 
