@@ -24,11 +24,8 @@ gender neighborhood VS hiv
 ```{r fig.width = 8, fig.height = 6}
 neb_plot = hiv_data %>% 
   group_by(neighborhood, gender) %>% 
-<<<<<<< HEAD
-  filter(age != "All") %>% 
-=======
   filter(age != "All") %>%
->>>>>>> f0c38606b3f150183d744918c518b92f84d8e764
+  filter(age != "All") %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(x = reorder(neighborhood, sum_hiv), y = sum_hiv, color = gender)) + 
   coord_flip() +
@@ -43,14 +40,18 @@ neb_plot = hiv_data %>%
 ggplotly(neb_plot)
 ```
 
+The number of HIV diagnoses is higher among male than female in all neighborhoods. Beford Stuyvesant - Crown Heights have the most HIV diagnoses for both men and women.
+
+gender, age vs hiv
+
 ```{r fig.width = 8, fig.height = 6}
 age_plot = hiv_data %>% 
   filter(age != "All") %>% 
   group_by(gender, age) %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(y = sum_hiv, x = age, fill = gender)) + 
-  geom_bar(stat="identity", alpha = 0.8, position = position_dodge()) +
-  scale_fill_brewer(palette="Dark2") +
+  geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
+  scale_fill_brewer(palette = "Dark2") +
   labs(
         title = "Gender and Age Influence on HIV Incidence",
         x = "Age range",
@@ -61,13 +62,15 @@ age_plot = hiv_data %>%
 ggplotly(age_plot)
 ```
 
+gender race vs hiv
+
 ```{r fig.width = 8, fig.height = 6}
 race_plot = hiv_data %>% 
   filter(race != "All") %>% 
   group_by(gender, race) %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(y = sum_hiv, x = reorder(race, sum_hiv), fill = gender)) + 
-  geom_bar(stat="identity", alpha = 0.8, position = position_dodge()) +
+  geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
   scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
   labs(
         title = "Race and Gender Influence on HIV Incidence",
@@ -79,8 +82,9 @@ race_plot = hiv_data %>%
 ggplotly(race_plot)
 ```
 
-<<<<<<< HEAD
-```{r}
+hiv diagnoses in borough with most hiv over years
+
+```{r} 
 hiv_data %>%
   group_by(borough) %>% 
   summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
@@ -89,14 +93,6 @@ hiv_data %>%
 year_plot = hiv_data %>% 
   mutate(year = as.integer(year)) %>% 
   filter(borough == "Brooklyn" & gender == "Male" & age == "20 - 29") %>% 
-=======
-Years in Bronx young (20-29) male
-
-```{r}
-year_plot = hiv_data %>% 
-  mutate(year = as.integer(year)) %>% 
-  filter(borough == "Bronx" & gender == "Male" & age == "20 - 29") %>% 
->>>>>>> f0c38606b3f150183d744918c518b92f84d8e764
   group_by(year, neighborhood) %>% 
   summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(x = year, y = sum_hiv, color = neighborhood)) +
@@ -104,7 +100,6 @@ year_plot = hiv_data %>%
 ggplotly(year_plot)
 ```
 
-<<<<<<< HEAD
-=======
+Limitations:
 
->>>>>>> f0c38606b3f150183d744918c518b92f84d8e764
+We can not visualize the effect of age and race at the same time.
