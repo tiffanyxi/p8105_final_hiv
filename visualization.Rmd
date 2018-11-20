@@ -24,6 +24,7 @@ gender neighborhood VS hiv
 ```{r fig.width = 8, fig.height = 6}
 neb_plot = hiv_data %>% 
   group_by(neighborhood, gender) %>% 
+  filter(age != "All") %>%
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(x = reorder(neighborhood, sum_hiv), y = sum_hiv, color = gender)) + 
   coord_flip() +
@@ -85,5 +86,10 @@ year_plot = hiv_data %>%
   ggplot(aes(x = year, y = sum_hiv, color = neighborhood)) +
   geom_line()
 ggplotly(year_plot)
+```
+
+```{r}
+
+fit = lm(hiv_data$hiv_diagnoses ~ hiv_data$borough + hiv_data$gender + hiv_data$age)
 ```
 
