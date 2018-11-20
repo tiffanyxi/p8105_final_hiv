@@ -30,8 +30,8 @@ neb_plot = hiv_data %>%
   geom_point() +
   labs(
         title = "Gender and Neighborhood Influence on HIV Incidence",
-        x = "HIV diagnoses",
-        y = "Neighborhood",
+        x = "Neighborhood",
+        y = "HIV diagnoses",
         caption = "Data from the ..."
       )
 
