@@ -44,7 +44,7 @@ age_plot = hiv_data %>%
   group_by(gender, age) %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(y = sum_hiv, x = age, fill = gender)) + 
-  geom_bar(stat="identity", alpha = 0.8, position=position_dodge()) +
+  geom_bar(stat="identity", alpha = 0.8, position = position_dodge()) +
   scale_fill_brewer(palette="Dark2") +
   labs(
         title = "Gender and Age Influence on HIV Incidence",
@@ -72,5 +72,18 @@ race_plot = hiv_data %>%
       ) 
 
 ggplotly(race_plot)
+```
+
+Years in Bronx young (20-29) male
+
+```{r}
+year_plot = hiv_data %>% 
+  mutate(year = as.integer(year)) %>% 
+  filter(borough == "Bronx" & gender == "Male" & age == "20 - 29") %>% 
+  group_by(year, neighborhood) %>% 
+  summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(x = year, y = sum_hiv, color = neighborhood)) +
+  geom_line()
+ggplotly(year_plot)
 ```
 
