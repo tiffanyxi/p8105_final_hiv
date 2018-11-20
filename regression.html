@@ -125,7 +125,68 @@ $(document).ready(function () {
 </div>
 
 
-
+<pre class="r"><code>hiv_data %&gt;% 
+  filter(age != &quot;All&quot;) %&gt;%
+  lm(hiv_diagnoses ~ gender + age + gender*age, data = .) %&gt;% 
+  summary()</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = hiv_diagnoses ~ gender + age + gender * age, data = .)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -17.429  -2.176  -0.752   1.362  47.571 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)             0.6381     0.4294   1.486   0.1374    
+## genderMale              1.2810     0.6073   2.109   0.0350 *  
+## age20 - 29              2.4810     0.6073   4.085 4.54e-05 ***
+## age30 - 39              2.4333     0.6073   4.007 6.34e-05 ***
+## age40 - 49              2.4667     0.6073   4.062 5.02e-05 ***
+## age50 - 59              1.5381     0.6073   2.533   0.0114 *  
+## age60+                  0.5429     0.6073   0.894   0.3715    
+## genderMale:age20 - 29  13.0286     0.8589  15.169  &lt; 2e-16 ***
+## genderMale:age30 - 39   7.4190     0.8589   8.638  &lt; 2e-16 ***
+## genderMale:age40 - 49   4.3667     0.8589   5.084 3.97e-07 ***
+## genderMale:age50 - 59   1.2762     0.8589   1.486   0.1374    
+## genderMale:age60+      -0.5286     0.8589  -0.615   0.5383    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 6.223 on 2508 degrees of freedom
+## Multiple R-squared:  0.3819, Adjusted R-squared:  0.3792 
+## F-statistic: 140.9 on 11 and 2508 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>hiv_data %&gt;% 
+  filter(race != &quot;All&quot;) %&gt;%
+  lm(hiv_diagnoses ~ gender + race + gender*race, data = .) %&gt;% 
+  summary()</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = hiv_diagnoses ~ gender + race + gender * race, data = .)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -17.810  -3.190  -0.262   0.738 107.190 
+## 
+## Coefficients:
+##                                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                      0.2619     0.7106   0.369 0.712492    
+## genderMale                       1.9714     1.0050   1.962 0.049930 *  
+## raceBlack                        7.9286     1.0050   7.889 4.85e-15 ***
+## raceLatino/Hispanic              3.7286     1.0050   3.710 0.000213 ***
+## raceOther/Unknown               -0.1524     1.0050  -0.152 0.879494    
+## raceWhite                        0.4762     1.0050   0.474 0.635663    
+## genderMale:raceBlack             7.6476     1.4212   5.381 8.24e-08 ***
+## genderMale:raceLatino/Hispanic  10.6667     1.4212   7.505 9.02e-14 ***
+## genderMale:raceOther/Unknown    -1.6905     1.4212  -1.189 0.234398    
+## genderMale:raceWhite             6.7667     1.4212   4.761 2.06e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 10.3 on 2090 degrees of freedom
+## Multiple R-squared:  0.2819, Adjusted R-squared:  0.2788 
+## F-statistic: 91.16 on 9 and 2090 DF,  p-value: &lt; 2.2e-16</code></pre>
 
 
 
