@@ -88,8 +88,4 @@ year_plot = hiv_data %>%
 ggplotly(year_plot)
 ```
 
-```{r}
-
-fit = lm(hiv_data$hiv_diagnoses ~ hiv_data$borough + hiv_data$gender + hiv_data$age)
-```
 
