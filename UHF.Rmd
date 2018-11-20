@@ -1,5 +1,5 @@
 ---
-title: "dataset"
+title: "combined_dataset"
 output: github_document
 ---
 
@@ -8,16 +8,26 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-```{r}
+```{r import_data}
 UHF_zipcode = read_csv("./data/appb.csv") %>% 
   slice(-43) %>% 
   select(-Borough) %>% 
   rename("UHF" = "UHF Neighborhood")
 ```
 
-```{r}
+
+```{r combine_data, warning=FALSE}
 data_hiv = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv")
 
-data_new = full_join(UHF_zipcode, data_hiv, by = "UHF")
+combine_hiv = 
+  full_join(UHF_zipcode, data_hiv, by = "UHF") %>%
+  janitor::clean_names() %>% 
+  separate(zip_code, into = c("zipcode1", "zipcode2", "zipcode3", 
+                              "zipcode4", "zipcode5", "zipcode6", "zipcode7", "zipcode8",
+                              "zipcode9"), sep = ", ") %>% 
+  gather(key = zip_code, value = zipcode_value, zipcode1:zipcode9) %>% 
+  filter(!is.na(zipcode_value)) %>% 
+  rename("zipcode" = "zipcode_value") %>% 
+  select(zipcode, everything(), -zip_code)
 ```
 

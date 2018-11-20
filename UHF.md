@@ -1,4 +1,4 @@
-dataset
+combined\_dataset
 ================
 
 ``` r
@@ -42,5 +42,14 @@ data_hiv = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv")
     ## )
 
 ``` r
-data_new = full_join(UHF_zipcode, data_hiv, by = "UHF")
+combine_hiv = 
+  full_join(UHF_zipcode, data_hiv, by = "UHF") %>%
+  janitor::clean_names() %>% 
+  separate(zip_code, into = c("zipcode1", "zipcode2", "zipcode3", 
+                              "zipcode4", "zipcode5", "zipcode6", "zipcode7", "zipcode8",
+                              "zipcode9"), sep = ", ") %>% 
+  gather(key = zip_code, value = zipcode_value, zipcode1:zipcode9) %>% 
+  filter(!is.na(zipcode_value)) %>% 
+  rename("zipcode" = "zipcode_value") %>% 
+  select(zipcode, everything(), -zip_code)
 ```
