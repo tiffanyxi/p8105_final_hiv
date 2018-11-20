@@ -24,6 +24,7 @@ gender neighborhood VS hiv
 ```{r fig.width = 8, fig.height = 6}
 neb_plot = hiv_data %>% 
   group_by(neighborhood, gender) %>% 
+  filter(age != "All") %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(x = reorder(neighborhood, sum_hiv), y = sum_hiv, color = gender)) + 
   coord_flip() +
@@ -62,8 +63,8 @@ race_plot = hiv_data %>%
   group_by(gender, race) %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(y = sum_hiv, x = reorder(race, sum_hiv), fill = gender)) + 
-  geom_bar(stat="identity", alpha = 0.8, position=position_dodge()) +
-  scale_fill_manual(values=c("#E69F00", "#56B4E9")) +
+  geom_bar(stat="identity", alpha = 0.8, position = position_dodge()) +
+  scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
   labs(
         title = "Race and Gender Influence on HIV Incidence",
         x = "Race",
@@ -72,5 +73,21 @@ race_plot = hiv_data %>%
       ) 
 
 ggplotly(race_plot)
+```
+
+```{r}
+hiv_data %>%
+  group_by(borough) %>% 
+  summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
+  arrange(desc(sum_hiv))
+
+year_plot = hiv_data %>% 
+  mutate(year = as.integer(year)) %>% 
+  filter(borough == "Brooklyn" & gender == "Male" & age == "20 - 29") %>% 
+  group_by(year, neighborhood) %>% 
+  summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(x = year, y = sum_hiv, color = neighborhood)) +
+  geom_line()
+ggplotly(year_plot)
 ```
 
