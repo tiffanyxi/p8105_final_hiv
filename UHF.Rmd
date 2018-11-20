@@ -9,8 +9,15 @@ library(tidyverse)
 ```
 
 ```{r}
-UHF_zipcode = read_csv(".data/appb.csv") %>% 
+UHF_zipcode = read_csv("./data/appb.csv") %>% 
   slice(-43) %>% 
-  select(-Borough) 
+  select(-Borough) %>% 
+  rename("UHF" = "UHF Neighborhood")
+```
+
+```{r}
+data_hiv = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv")
+
+data_new = full_join(UHF_zipcode, data_hiv, by = "UHF")
 ```
 
