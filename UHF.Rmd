@@ -1,0 +1,16 @@
+---
+title: "dataset"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+UHF_zipcode = read_csv(".data/appb.csv") %>% 
+  slice(-43) %>% 
+  select(-Borough) 
+```
+
