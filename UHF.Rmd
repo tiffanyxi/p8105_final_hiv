@@ -35,7 +35,7 @@ combine_hiv =
 
 ```{r pin_data}
 location = 
-  read.csv("./zip_codes_states.csv") %>% 
+  read.csv("./data/zip_codes_states.csv") %>% 
   select(zip_code, latitude, longitude) %>% 
   rename("zipcode" = "zip_code") %>% 
   mutate(zipcode = as.character(zipcode))
