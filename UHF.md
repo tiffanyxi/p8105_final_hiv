@@ -53,3 +53,17 @@ combine_hiv =
   rename("zipcode" = "zipcode_value") %>% 
   select(zipcode, everything(), -zip_code)
 ```
+
+``` r
+location = read.csv("./zip_codes_states.csv") %>% 
+  filter(state == "NY", county == "New York") %>% 
+  select(zip_code, latitude, longitude) %>% 
+  rename("zipcode" = "zip_code") %>% 
+  mutate(zipcode = as.character(zipcode))
+  
+combine_hiv = full_join(location, combine_hiv, by = "zipcode")
+```
+
+``` r
+write_csv(combine_hiv, "./data/combine_hiv_location.csv")
+```
