@@ -31,6 +31,20 @@ pums_data$year = recode(pums_data$year,
                         "1009585" = "2014", 
                         "1001264" = "2015")
 
+pums_data = 
+  pums_data %>% 
+  group_by(year, puma) %>% 
+  summarise(mid_income = median(income, na.rm = TRUE))
+```
+
+```{r zipcode match}
+puma_to_zipcode = right_join(zip_to_zcta, zcta_to_puma, by = "zcta") %>% 
+  select(puma, zipcode)
+
+income_zipcode = right_join(pums_data, puma_to_zipcode, by = "puma") %>% 
+  select(year, zipcode, mid_income)
+
+
 ```
 
 
