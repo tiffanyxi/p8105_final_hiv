@@ -17,10 +17,12 @@ hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
   mutate(year = as.character(year), age = as.factor(age), gender = as.factor(gender))
 ```
 
+
+ 
 ```{r}
 hiv_data %>% 
   filter(age != "All") %>%
-  lm(hiv_diagnoses ~ gender + age + gender*age, data = .) %>% 
+  lm(hiv_diagnoses ~ borough + gender + age + gender*age, data = .) %>% 
   summary()
 
 hiv_data %>% 
