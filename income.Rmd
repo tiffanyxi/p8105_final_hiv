@@ -2,12 +2,37 @@
 title: "income_data_handling"
 output: github_document
 ---
+```{r}
+library(tidyverse)
+```
+
+
 
 ```{r add data source}
-pums_data = read.csv("./data/selected_pums.csv")
+pums_raw = read.csv("./data/selected_pums.csv")
 
+zcta_to_puma = readxl::read_xls("./data/zcta10_to_puma10_nyc.xls", sheet = 2) %>% 
+  select(zcta = zcta10, puma = puma10) %>% 
+  mutate(puma = as.numeric(puma))
+
+zip_to_zcta = readxl::read_xls("./data/zip_to_zcta10_nyc.xls", sheet = 2) %>% 
+  select(zipcode, zcta = zcta5)
+```
+
+```{r pums data wrangling}
+pums_data = 
+  pums_raw %>% 
+  select(puma = PUMA10, income = PINCP, year = ADJINC) %>% 
+  filter(puma != -9) 
+
+pums_data$year = recode(pums_data$year, 
+                        "1042852" = "2012",
+                        "1025215" = "2013",  
+                        "1009585" = "2014", 
+                        "1001264" = "2015")
 
 ```
+
 
 ## Current Problems
 tranfer PUMA10 code into locations.(Ref. found)  
