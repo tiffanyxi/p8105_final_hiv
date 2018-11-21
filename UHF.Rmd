@@ -1,0 +1,53 @@
+---
+title: "combined_dataset"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r import_data}
+UHF_zipcode = 
+  read_csv("./data/appb.csv") %>% 
+  slice(-43) %>% 
+  select(-Borough) %>% 
+  rename("UHF" = "UHF Neighborhood") %>% 
+  janitor::clean_names()
+```
+
+```{r combine_data, warning=FALSE}
+data_hiv = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>% 
+  janitor::clean_names()
+
+combine_hiv = 
+  right_join(UHF_zipcode, data_hiv, by = "uhf") %>%
+  janitor::clean_names() %>% 
+  separate(zip_code, into = c("zipcode1", "zipcode2", "zipcode3", 
+                              "zipcode4", "zipcode5", "zipcode6", "zipcode7", "zipcode8",
+                              "zipcode9"), sep = ", ") %>% 
+  gather(key = zip_code, value = zipcode_value, zipcode1:zipcode9) %>% 
+  filter(!is.na(zipcode_value)) %>% 
+  rename("zipcode" = "zipcode_value") %>% 
+  select(zipcode, everything(), -zip_code)
+```
+
+```{r pin_data}
+location = 
+  read.csv("./data/zip_codes_states.csv") %>% 
+  select(zip_code, latitude, longitude) %>% 
+  rename("zipcode" = "zip_code") %>% 
+  mutate(zipcode = as.character(zipcode))
+  
+combine_hiv1 = 
+  right_join(location, combine_hiv, by = "zipcode") %>% 
+  mutate(longitude = as.numeric(longitude), latitude = as.numeric(latitude)) %>% 
+  group_by(uhf) %>% 
+  summarise(lng = mean(longitude),
+            lat = mean(latitude)) %>% 
+  filter(!(uhf == "Pelhem - Throgs Neck"))
+```
+
+
+
