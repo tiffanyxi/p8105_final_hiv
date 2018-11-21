@@ -40,20 +40,40 @@ diagnoses_by_zipcode = data_hiv %>%
   summarise(sum_hiv_diagnoses = sum(hiv_diagnoses))
 
 map_data = geo_join(nyc_zipcode, diagnoses_by_zipcode, "postalCode", "zipcode")
-
 ```
+
+## point
+```{r}
+#nyc_zipcode_df = as_tibble(nyc_zipcode@data) 
+#points_spdf = full_join(data_hiv, nyc_zipcode_df, by = "zipcode") %>% 
+
+points_spdf = read.csv("./data/combine_hiv_pin.csv")
+
+coordinates(points_spdf) = ~lng + lat
+proj4string(points_spdf) = proj4string(nyc_zipcode)
+matches = over(points_spdf, nyc_zipcode)
+
+diagnoses_by_postalcode = diagnoses_by_zipcode %>% 
+  rename(postalCode = zipcode)
+
+points = full_join(matches, diagnoses_by_postalcode, by = "postalCode")
+```
+
+
 
 ## color
 
 ```{r}
-pal = colorNumeric(palette = "Greens", domain = range(map_data@data$sum_hiv_diagnoses, na.rm = T))
+pal = colorNumeric(palette = "plasma", domain = range(map_data@data$sum_hiv_diagnoses, na.rm = T))
+# "BuPu" "viridis" "Greens""inferno"
 
 leaflet(map_data) %>%
   addTiles() %>%  
   addPolygons(color = "black", weight = 0.5, opacity = 1, 
               fillColor = ~pal(sum_hiv_diagnoses), 
-              popup = ~str_c(uhf, "sum:", factor(sum_hiv_diagnoses))) %>% 
-#  addMarkers(~lng, ~lat, popup = ~postalCode, data = points) %>%  #factor(sum_hiv_diagnoses)
+              popup = ~stringr::str_c(uhf, "  sum:", factor(sum_hiv_diagnoses))) %>% 
+  addMarkers(~longitude, ~latitude, 
+             popup = ~stringr::str_c(uhf, "  sum:", factor(sum_hiv_diagnoses)), data = points) %>%  
   addProviderTiles("CartoDB.Positron") %>%
   setView(-73.98, 40.75, zoom = 11)
 
