@@ -46,9 +46,12 @@ income_zipcode = right_join(pums_data, puma_to_zipcode, by = "puma") %>%  # matc
 ```
 
 
-## Illustrations
-Here, we use the data from 2011-2015 American Community Survey Public Use Microdata Sample
-  
+## Data Source description
+Here, we use the data from 2011-2015 American Community Survey (ACS) Public Use Microdata Sample (PUMS). 
+The dataset was selected based on our interested variables - location and totaly income.
+The location data from 2011 ACS is based on Public use microdata area code (PUMA) 2000, while the definition for PUMA 2000 is nowhere to be found.
+This is why we exclude the data from 2011.
+
 ## Column names meaning in PUMS
   
 This data is selected based on the variables that we may need
