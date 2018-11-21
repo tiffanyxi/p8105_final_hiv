@@ -17,6 +17,11 @@ hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
   rename(neighborhood = uhf) %>% 
   filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
   mutate(year = as.character(year), age = as.factor(age))
+
+hiv_data2 = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>% 
+  janitor::clean_names() %>% 
+  rename(neighborhood = uhf) %>% 
+  mutate(year = as.character(year), age = as.factor(age))
 ```
 
 gender neighborhood VS hiv
@@ -25,7 +30,6 @@ gender neighborhood VS hiv
 neb_plot = hiv_data %>% 
   group_by(neighborhood, gender) %>% 
   filter(age != "All") %>%
-  filter(age != "All") %>% 
   summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
   ggplot(aes(x = reorder(neighborhood, sum_hiv), y = sum_hiv, color = gender)) + 
   coord_flip() +
@@ -60,6 +64,22 @@ age_plot = hiv_data %>%
       ) 
 
 ggplotly(age_plot)
+
+age_plot2 = hiv_data2 %>% 
+  filter(borough == "All", neighborhood == "All", race == "All",  gender != "All", age != "All") %>% 
+  group_by(gender, age) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(y = sum_hiv, x = age, fill = gender)) + 
+  geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+        title = "Gender and Age Influence on HIV Incidence",
+        x = "Age range",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+
+ggplotly(age_plot2)
 ```
 
 gender race vs hiv
@@ -80,12 +100,29 @@ race_plot = hiv_data %>%
       ) 
 
 ggplotly(race_plot)
+
+race_plot2 = hiv_data2 %>% 
+  filter(borough == "All", neighborhood == "All", race != "All",  gender != "All", age == "All") %>% 
+  group_by(gender, race) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(y = sum_hiv, x = reorder(race, sum_hiv), fill = gender)) + 
+  geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
+  scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
+  labs(
+        title = "Race and Gender Influence on HIV Incidence",
+        x = "Race",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+
+ggplotly(race_plot2)
 ```
 
 hiv diagnoses in borough with most hiv over years
 
 ```{r} 
-hiv_data %>%
+hiv_data2 %>%
+  filter(borough != "All", neighborhood == "All", gender == "All", age == "All", race == "All") %>% 
   group_by(borough) %>% 
   summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
   arrange(desc(sum_hiv))
