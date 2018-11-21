@@ -21,14 +21,16 @@ nyc_zipcode = readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
 #summary(nyc_zipcode)
 
-#nyc_neighborhoods_df <-= tidy(nyc_zipcode)
+#nyc_zipcode_df <-= tidy(nyc_zipcode)
 
 leaflet(nyc_zipcode) %>%
   addTiles() %>% 
   addPolygons(popup = ~postalCode)
+```
+
 
 ## add points
-
+```{r}
 data_hiv = read.csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>% 
   janitor::clean_names() %>% 
   mutate(hiv_diagnoses = as.numeric(hiv_diagnoses))
