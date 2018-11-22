@@ -29,7 +29,8 @@ UHF_zipcode =
 ```
 
 ```{r combine_data, warning=FALSE}
-raw_hiv = GET("https://data.cityofnewyork.us/resource/9n66-rbk3.csv") %>% 
+raw_hiv = 
+  GET("https://data.cityofnewyork.us/api/views/fju2-rdad/rows.csv") %>% 
   content("parsed") %>% 
   janitor::clean_names()
 
@@ -54,7 +55,7 @@ zipcode_lat_lng = nyc_zipcode@data %>%
   mutate(zipcode = as.character(zipcode))
   
 combine_hiv1 = 
-  right_join(zipcode_lat_lng, combine_hiv, by = "zipcode") %>% 
+  full_join(zipcode_lat_lng, combine_hiv, by = "zipcode") %>% 
   mutate(longitude = as.numeric(longitude), latitude = as.numeric(latitude)) %>% 
   group_by(uhf) %>% 
   summarise(lng = mean(longitude),
@@ -66,15 +67,16 @@ combine_hiv1 =
 pums_raw = read.csv("./data/selected_pums.csv")  
 
 temp = tempfile(fileext = ".xls")
-dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls"
-download.file(dataURL, destfile=temp, mode='wb')
+dataURL = "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls"
+download.file(dataURL, destfile = temp, mode = 'wb')
 
-zcta_to_puma = readxl::read_xls(temp, sheet = 2)%>% 
+zcta_to_puma = readxl::read_xls(temp, sheet = 2) %>% 
   select(zcta = zcta10, puma = puma10) %>% 
   mutate(puma = as.numeric(puma))
 
-dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
-download.file(dataURL, destfile=temp, mode='wb')
+dataURL =
+  "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
+download.file(dataURL, destfile = temp, mode = 'wb')
 zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>% 
   select(zipcode, zcta = zcta5) 
 ```
