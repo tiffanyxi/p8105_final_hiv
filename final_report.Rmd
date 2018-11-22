@@ -218,8 +218,7 @@ ggplotly(year_plot)
 ## Income vs Hiv
 
 ```{r}
-hiv_income = read_csv("./data/combine_hiv_income.csv")
-income_plot = hiv_income %>% 
+income_plot = combine_hiv_income %>% 
   filter(year != 2011, gender == "All", age == "All", race == "All") %>% 
   group_by(uhf) %>%
   summarise(sum_hiv = sum(hiv_diagnoses), mean_income = mean(mid_income)) %>% 
