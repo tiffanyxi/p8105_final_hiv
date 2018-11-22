@@ -6,6 +6,17 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(rvest)
+library(httr)
+library(tigris)
+library(dplyr)
+library(leaflet)
+library(sp)
+library(ggmap)
+library(maptools)
+library(broom)
+library(httr)
+library(rgdal)
 ```
 
 ```{r import_data}
@@ -18,11 +29,12 @@ UHF_zipcode =
 ```
 
 ```{r combine_data, warning=FALSE}
-data_hiv = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>% 
+raw_hiv = GET("https://data.cityofnewyork.us/resource/9n66-rbk3.csv") %>% 
+  content("parsed") %>% 
   janitor::clean_names()
 
 combine_hiv = 
-  right_join(UHF_zipcode, data_hiv, by = "uhf") %>%
+  right_join(UHF_zipcode, raw_hiv, by = "uhf") %>%
   janitor::clean_names() %>% 
   separate(zip_code, into = c("zipcode1", "zipcode2", "zipcode3", 
                               "zipcode4", "zipcode5", "zipcode6", "zipcode7", "zipcode8",
@@ -34,20 +46,22 @@ combine_hiv =
 ```
 
 ```{r pin_data}
-location = 
-  read.csv("./data/zip_codes_states.csv") %>% 
-  select(zip_code, latitude, longitude) %>% 
-  rename("zipcode" = "zip_code") %>% 
+r = GET('http://data.beta.nyc//dataset/3bf5fb73-edb5-4b05-bb29-7c95f4a727fc/resource/6df127b1-6d04-4bb7-b983-07402a2c3f90/download/f4129d9aa6dd4281bc98d0f701629b76nyczipcodetabulationareas.geojson')
+nyc_zipcode = readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+zipcode_lat_lng = nyc_zipcode@data %>% 
+  select(zipcode = postalCode, longitude, latitude) %>% 
   mutate(zipcode = as.character(zipcode))
   
 combine_hiv1 = 
-  right_join(location, combine_hiv, by = "zipcode") %>% 
+  right_join(zipcode_lat_lng, combine_hiv, by = "zipcode") %>% 
   mutate(longitude = as.numeric(longitude), latitude = as.numeric(latitude)) %>% 
   group_by(uhf) %>% 
   summarise(lng = mean(longitude),
             lat = mean(latitude)) %>% 
   filter(!(uhf == "Pelhem - Throgs Neck"))
 ```
+
 
 
 
