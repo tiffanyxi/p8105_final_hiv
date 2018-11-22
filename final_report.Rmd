@@ -21,19 +21,21 @@ library(rgdal)
 
 # 1 tidy data
 
+
+
+```{r combine_data, warning=FALSE}
+raw_hiv = 
+  GET("https://data.cityofnewyork.us/api/views/fju2-rdad/rows.csv") %>% 
+  content("parsed") %>% 
+  janitor::clean_names()
+```
+
 ```{r import_data}
 UHF_zipcode = 
   read_csv("./data/appb.csv") %>% 
   slice(-43) %>% 
   select(-Borough) %>% 
   rename("UHF" = "UHF Neighborhood") %>% 
-  janitor::clean_names()
-```
-
-```{r combine_data, warning=FALSE}
-raw_hiv = 
-  GET("https://data.cityofnewyork.us/api/views/fju2-rdad/rows.csv") %>% 
-  content("parsed") %>% 
   janitor::clean_names()
 
 combine_hiv = 
