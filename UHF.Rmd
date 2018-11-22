@@ -76,7 +76,7 @@ zcta_to_puma = readxl::read_xls(temp, sheet = 2)%>%
 dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
 download.file(dataURL, destfile=temp, mode='wb')
 zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>% 
-  select(zipcode, zcta = zcta5)
+  select(zipcode, zcta = zcta5) 
 ```
 
 ```{r pums data wrangling}
@@ -94,7 +94,8 @@ pums_data$year = recode(pums_data$year,
 pums_data = 
   pums_data %>% 
   group_by(year, puma) %>% 
-  summarise(mid_income = median(income, na.rm = TRUE))  # calculate yearly median income for each area
+  summarise(mid_income = median(income, na.rm = TRUE)) %>% 
+  ungroup()         # calculate yearly median income for each area
 ```
 
 ```{r zipcode match}
@@ -102,7 +103,11 @@ puma_to_zipcode = right_join(zip_to_zcta, zcta_to_puma, by = "zcta") %>%   # gen
   select(puma, zipcode)
 
 income_zipcode = right_join(pums_data, puma_to_zipcode, by = "puma") %>%  # matching zipcode with median income data
-  select(year, zipcode, mid_income)
+  select(year, zipcode, mid_income) %>% 
+  mutate(year = as.numeric(year))
+
+combine_hiv_income = 
+  left_join(combine_hiv, income_zipcode, by = c("year", "zipcode"))
 ```
 
 
