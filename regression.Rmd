@@ -11,12 +11,6 @@ theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = el
 
 
 ```{r message = FALSE, echo = FALSE}
-hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>% 
-  janitor::clean_names() %>% 
-  rename(neighborhood = uhf) %>% 
-  filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
-  mutate(year = as.character(year), age = as.factor(age), gender = as.factor(gender))
-
 income_hiv = read_csv("./data/combine_hiv_income.csv")
 ```
 
@@ -26,12 +20,16 @@ income_hiv = read_csv("./data/combine_hiv_income.csv")
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_diagnoses ~ borough + gender + age + mid_income, data = .) %>% 
-  summary()
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
 
 income_hiv %>% 
   filter(year != "2011" & race != "All") %>%
   lm(hiv_diagnoses ~ borough + gender + race + mid_income, data = .) %>% 
-  summary()
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
 
 income_plot = income_hiv %>% 
   filter(year != "2011") %>% 
@@ -62,12 +60,16 @@ ggplotly(income_dist)
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_related_death_rate ~ borough + gender + age + mid_income, data = .) %>% 
-  summary()
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
 
 income_hiv %>% 
   filter(year != "2011" & race != "All") %>%
   lm(hiv_related_death_rate ~ borough + gender + race + mid_income, data = .) %>% 
-  summary()
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
 
 income_plot2 = income_hiv %>% 
   filter(year != "2011") %>% 
@@ -87,12 +89,16 @@ ggplotly(income_plot2)
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_diagnosis_rate ~ borough + gender + age + mid_income, data = .) %>% 
-  summary()
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
 
 income_hiv %>% 
   filter(year != "2011" & race != "All") %>%
   lm(hiv_diagnosis_rate ~ borough + gender + race + mid_income, data = .) %>% 
-  summary()
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
 
 income_plot_diag_rate = income_hiv %>% 
   filter(year != "2011") %>% 
