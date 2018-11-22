@@ -1,11 +1,12 @@
 ---
 title: "combined_dataset"
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(plotly)
 library(rvest)
 library(httr)
 library(tigris)
@@ -17,6 +18,7 @@ library(maptools)
 library(broom)
 library(httr)
 library(rgdal)
+theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5)))
 ```
 
 # 1 tidy data
@@ -119,8 +121,233 @@ combine_hiv_income =
 
 # 2 visualization
 
+First, import and tidy data:
+
+```{r message=FALSE, echo = FALSE}
+hiv_data = 
+  raw_hiv %>%  
+  rename(neighborhood = uhf) %>% 
+  mutate(year = as.character(year), age = as.factor(age))
+```
+
+gender neighborhood VS hiv
+
+```{r fig.width = 8, fig.height = 6}
+neb_plot = hiv_data %>% 
+  group_by(neighborhood, gender) %>% 
+  filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
+  filter(age != "All") %>%
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(x = reorder(neighborhood, sum_hiv), y = sum_hiv, color = gender)) + 
+  coord_flip() +
+  geom_point() +
+  labs(
+        title = "Gender and Neighborhood Influence on HIV Incidence",
+        x = "Neighborhood",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      )
+
+ggplotly(neb_plot)
+```
+
+The number of HIV diagnoses is higher among male than female in all neighborhoods. Beford Stuyvesant - Crown Heights have the most HIV diagnoses for both men and women.
+
+### Gender, age vs hiv
+
+* Omit the data of transgender group, because the data of transgender were not divided into specific age groups.
+```{r fig.width = 8, fig.height = 6}
+age_plot = hiv_data %>% 
+  filter(race == "All" & borough == "All" & age != "All") %>% 
+  group_by(gender, age) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(y = sum_hiv, x = age, fill = gender)) + 
+  geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+        title = "Gender and Age Influence on HIV Incidence",
+        x = "Age range",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+
+ggplotly(age_plot)
+
+```
+
+### Gender race vs hiv
+
+```{r fig.width = 8, fig.height = 6}
+race_plot = hiv_data %>% 
+  filter(age == "All" & borough == "All" & race != "All") %>% 
+  group_by(gender, race) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(y = sum_hiv, x = reorder(race, sum_hiv), fill = gender)) + 
+  geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
+  scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
+  labs(
+        title = "Race and Gender Influence on HIV Incidence",
+        x = "Race",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+
+ggplotly(race_plot)
+```
+
+hiv diagnoses in borough with most hiv over years
+
+```{r} 
+hiv_data %>%
+  filter(borough != "All", neighborhood == "All", gender == "All", age == "All", race == "All") %>% 
+  group_by(borough) %>% 
+  summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
+  arrange(desc(sum_hiv))
+
+year_plot = hiv_data %>% 
+  mutate(year = as.integer(year)) %>% 
+  filter(borough == "Brooklyn" & gender == "Male" & age == "20 - 29") %>% 
+  group_by(year, neighborhood) %>% 
+  summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
+  ggplot(aes(x = year, y = sum_hiv, color = neighborhood)) +
+  geom_line()
+  
+ggplotly(year_plot)
+```
+
+## Income vs Hiv
+
+```{r}
+hiv_income = read_csv("./data/combine_hiv_income.csv")
+income_plot = hiv_income %>% 
+  filter(year != 2011, gender == "All", age == "All", race == "All") %>% 
+  group_by(uhf) %>%
+  summarise(sum_hiv = sum(hiv_diagnoses), mean_income = mean(mid_income)) %>% 
+  ggplot(aes(x = mean_income, y = sum_hiv)) + 
+  geom_point() +
+  labs(
+        title = "Income Influence on HIV Incidence",
+        x = "Average income of each neighborhood",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      )
+
+ggplotly(income_plot)
+```
+
+Limitations:
+
+We can not visualize the effect of age and race at the same time.
 
 # 3 regression
+
+```{r message = FALSE, echo = FALSE}
+hiv_data_reg = raw_hiv %>% 
+  rename(neighborhood = uhf) %>% 
+  filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
+  mutate(year = as.character(year), age = as.factor(age), gender = as.factor(gender))
+
+income_hiv = combine_hiv_income
+```
+
+## Hiv diagnoses
+
+```{r}
+income_hiv %>% 
+  filter(year != "2011" & age != "All") %>%
+  lm(hiv_diagnoses ~ borough + gender + age + mid_income, data = .) %>% 
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+
+income_hiv %>% 
+  filter(year != "2011" & race != "All") %>%
+  lm(hiv_diagnoses ~ borough + gender + race + mid_income, data = .) %>% 
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+
+income_plot = income_hiv %>% 
+  filter(year != "2011") %>% 
+  group_by(uhf, year) %>% 
+  summarise(sum_hiv = mean(hiv_diagnoses), mid_in = median(mid_income)) %>% 
+  ggplot(aes(x = mid_in, y = sum_hiv, color = year)) +
+  geom_point() + 
+  geom_smooth(method = lm) +
+  theme_bw() +
+  theme(legend.position = "None")
+ggplotly(income_plot)
+```
+
+Income distribution in different neighborhood
+
+```{r}
+income_dist = income_hiv %>% 
+  ggplot(aes(y = mid_income, x = uhf)) +
+  geom_point(alpha = 0.1) +
+  coord_flip() +
+  theme_bw()
+ggplotly(income_dist)         
+```
+
+## Hiv related death rate
+
+```{r}
+income_hiv %>% 
+  filter(year != "2011" & age != "All") %>%
+  lm(hiv_related_death_rate ~ borough + gender + age + mid_income, data = .) %>% 
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+
+income_hiv %>% 
+  filter(year != "2011" & race != "All") %>%
+  lm(hiv_related_death_rate ~ borough + gender + race + mid_income, data = .) %>% 
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+
+income_plot2 = income_hiv %>% 
+  filter(year != "2011") %>% 
+  group_by(uhf, year) %>% 
+  summarise(sum_hiv_related_death = sum(hiv_related_death_rate), mid_in = median(mid_income)) %>% 
+  ggplot(aes(x = mid_in, y = sum_hiv_related_death, color = year)) +
+  geom_point() + 
+  geom_smooth(method = lm) +
+  theme_bw() +
+  theme(legend.position = "None")
+ggplotly(income_plot2)
+```
+
+## HIV diagnosis rate
+
+```{r}
+income_hiv %>% 
+  filter(year != "2011" & age != "All") %>%
+  lm(hiv_diagnosis_rate ~ borough + gender + age + mid_income, data = .) %>% 
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+
+income_hiv %>% 
+  filter(year != "2011" & race != "All") %>%
+  lm(hiv_diagnosis_rate ~ borough + gender + race + mid_income, data = .) %>% 
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 3)
+
+income_plot_diag_rate = income_hiv %>% 
+  filter(year != "2011") %>% 
+  group_by(uhf, year) %>% 
+  summarise(sum_hiv_diagnosis_rate = sum(hiv_diagnosis_rate), mid_in = median(mid_income)) %>% 
+  ggplot(aes(x = mid_in, y = sum_hiv_diagnosis_rate, color = year)) +
+  geom_point() + 
+  geom_smooth(method = lm) +
+  theme_bw() +
+  theme(legend.position = "None")
+ggplotly(income_plot_diag_rate)
+```
+
 
 
 # 4 map plot
