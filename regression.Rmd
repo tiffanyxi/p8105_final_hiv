@@ -20,7 +20,6 @@ hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
 income_hiv = read_csv("./data/combine_hiv_income.csv")
 ```
 
-
  
 ```{r}
 income_hiv %>% 
@@ -39,6 +38,7 @@ income_plot = income_hiv %>%
   summarise(sum_hiv = mean(hiv_diagnoses), mid_in = median(mid_income)) %>% 
   ggplot(aes(x = mid_in, y = sum_hiv, color = year)) +
   geom_point() + 
+  geom_smooth(method = lm) +
   theme_bw() +
   theme(legend.position = "None")
 ggplotly(income_plot)
