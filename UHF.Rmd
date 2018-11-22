@@ -62,6 +62,49 @@ combine_hiv1 =
   filter(!(uhf == "Pelhem - Throgs Neck"))
 ```
 
+```{r add data source}
+pums_raw = read.csv("./data/selected_pums.csv")  
+
+temp = tempfile(fileext = ".xls")
+dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls"
+download.file(dataURL, destfile=temp, mode='wb')
+
+zcta_to_puma = readxl::read_xls(temp, sheet = 2)%>% 
+  select(zcta = zcta10, puma = puma10) %>% 
+  mutate(puma = as.numeric(puma))
+
+dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
+download.file(dataURL, destfile=temp, mode='wb')
+zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>% 
+  select(zipcode, zcta = zcta5)
+```
+
+```{r pums data wrangling}
+pums_data = 
+  pums_raw %>% 
+  select(puma = PUMA10, income = PINCP, year = ADJINC) %>% 
+  filter(puma != -9)  # remove data from 2011 due to lack of area information
+
+pums_data$year = recode(pums_data$year, 
+                        "1042852" = "2012",
+                        "1025215" = "2013",  
+                        "1009585" = "2014", 
+                        "1001264" = "2015")   
+
+pums_data = 
+  pums_data %>% 
+  group_by(year, puma) %>% 
+  summarise(mid_income = median(income, na.rm = TRUE))  # calculate yearly median income for each area
+```
+
+```{r zipcode match}
+puma_to_zipcode = right_join(zip_to_zcta, zcta_to_puma, by = "zcta") %>%   # generaate a puma to zipcode file
+  select(puma, zipcode)
+
+income_zipcode = right_join(pums_data, puma_to_zipcode, by = "puma") %>%  # matching zipcode with median income data
+  select(year, zipcode, mid_income)
+```
+
 
 
 
