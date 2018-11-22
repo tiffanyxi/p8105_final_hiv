@@ -103,6 +103,26 @@ year_plot = hiv_data %>%
 ggplotly(year_plot)
 ```
 
+## Income vs Hiv
+
+```{r}
+hiv_income = read_csv("./data/combine_hiv_income.csv")
+income_plot = hiv_income %>% 
+  filter(year != 2011, gender == "All", age == "All", race == "All") %>% 
+  group_by(uhf) %>%
+  summarise(sum_hiv = sum(hiv_diagnoses), mean_income = mean(mid_income)) %>% 
+  ggplot(aes(x = mean_income, y = sum_hiv)) + 
+  geom_point() +
+  labs(
+        title = "Income Influence on HIV Incidence",
+        x = "Average income of each neighborhood",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      )
+
+ggplotly(income_plot)
+```
+
 Limitations:
 
 We can not visualize the effect of age and race at the same time.
