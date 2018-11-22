@@ -21,7 +21,7 @@ nyc_zipcode = readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
 #summary(nyc_zipcode)
 
-#nyc_zipcode_df <-= tidy(nyc_zipcode)
+#nyc_zipcode_df = tidy(nyc_zipcode)
 
 leaflet(nyc_zipcode) %>%
   addTiles() %>% 
@@ -32,13 +32,14 @@ leaflet(nyc_zipcode) %>%
 ## geo_jion
 
 ```{r}
-data_hiv = read.csv("./data/combine_hiv_new.csv") %>%
+data_hiv = read_csv("./data/combine_hiv_income.csv") %>%
   filter(gender == "All", age == "All", race == "All")
 
 diagnoses_by_zipcode = data_hiv %>% 
+  mutate(zipcode = factor(zipcode)) %>% 
   group_by(zipcode, uhf) %>% 
   summarise(sum_hiv_diagnoses = sum(hiv_diagnoses))
-
+  
 map_data = geo_join(nyc_zipcode, diagnoses_by_zipcode, "postalCode", "zipcode")
 ```
 
@@ -60,22 +61,27 @@ points = full_join(matches, diagnoses_by_postalcode, by = "postalCode")
 ```
 
 
-
-## color
+## color hiv_diagnoses
 
 ```{r}
-pal = colorNumeric(palette = "plasma", domain = range(map_data@data$sum_hiv_diagnoses, na.rm = T))
+pal = colorNumeric(palette = "Reds", domain = range(map_data@data$sum_hiv_diagnoses, na.rm = T))
 # "BuPu" "viridis" "Greens""inferno"
 
 leaflet(map_data) %>%
   addTiles() %>%  
-  addPolygons(color = "black", weight = 0.5, opacity = 1, 
-              fillColor = ~pal(sum_hiv_diagnoses), 
+  addPolygons(color = "black", weight = 1,
+              fillColor = ~pal(sum_hiv_diagnoses), fillOpacity = 0.8, 
               popup = ~stringr::str_c(uhf, "  sum:", factor(sum_hiv_diagnoses))) %>% 
-  addMarkers(~longitude, ~latitude, 
+  addMarkers(~longitude, ~latitude,
              popup = ~stringr::str_c(uhf, "  sum:", factor(sum_hiv_diagnoses)), data = points) %>%  
   addProviderTiles("CartoDB.Positron") %>%
+  addLegend(position = "bottomright", pal = pal, values = ~sum_hiv_diagnoses,
+            title = "The amount of HIV diagnoses", opacity = 0.8) %>% 
   setView(-73.98, 40.75, zoom = 11)
+```
+
+## color income
+```{r}
 
 ```
 
