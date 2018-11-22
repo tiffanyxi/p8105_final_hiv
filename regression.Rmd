@@ -20,7 +20,8 @@ hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
 income_hiv = read_csv("./data/combine_hiv_income.csv")
 ```
 
- 
+## Hiv diagnoses
+
 ```{r}
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
@@ -50,9 +51,58 @@ Income distribution in different neighborhood
 income_dist = income_hiv %>% 
   ggplot(aes(y = mid_income, x = uhf)) +
   geom_point(alpha = 0.1) +
-  coord_flip() + 
+  coord_flip() +
   theme_bw()
 ggplotly(income_dist)         
 ```
 
+## Hiv related death rate
+
+```{r}
+income_hiv %>% 
+  filter(year != "2011" & age != "All") %>%
+  lm(hiv_related_death_rate ~ borough + gender + age + mid_income, data = .) %>% 
+  summary()
+
+income_hiv %>% 
+  filter(year != "2011" & race != "All") %>%
+  lm(hiv_related_death_rate ~ borough + gender + race + mid_income, data = .) %>% 
+  summary()
+
+income_plot2 = income_hiv %>% 
+  filter(year != "2011") %>% 
+  group_by(uhf, year) %>% 
+  summarise(sum_hiv_related_death = sum(hiv_related_death_rate), mid_in = median(mid_income)) %>% 
+  ggplot(aes(x = mid_in, y = sum_hiv_related_death, color = year)) +
+  geom_point() + 
+  geom_smooth(method = lm) +
+  theme_bw() +
+  theme(legend.position = "None")
+ggplotly(income_plot2)
+```
+
+## HIV diagnosis rate
+
+```{r}
+income_hiv %>% 
+  filter(year != "2011" & age != "All") %>%
+  lm(hiv_diagnosis_rate ~ borough + gender + age + mid_income, data = .) %>% 
+  summary()
+
+income_hiv %>% 
+  filter(year != "2011" & race != "All") %>%
+  lm(hiv_diagnosis_rate ~ borough + gender + race + mid_income, data = .) %>% 
+  summary()
+
+income_plot_diag_rate = income_hiv %>% 
+  filter(year != "2011") %>% 
+  group_by(uhf, year) %>% 
+  summarise(sum_hiv_diagnosis_rate = sum(hiv_diagnosis_rate), mid_in = median(mid_income)) %>% 
+  ggplot(aes(x = mid_in, y = sum_hiv_diagnosis_rate, color = year)) +
+  geom_point() + 
+  geom_smooth(method = lm) +
+  theme_bw() +
+  theme(legend.position = "None")
+ggplotly(income_plot_diag_rate)
+```
 
