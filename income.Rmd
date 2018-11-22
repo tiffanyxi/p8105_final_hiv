@@ -11,11 +11,17 @@ library(tidyverse)
 ```{r add data source}
 pums_raw = read.csv("./data/selected_pums.csv")  
 
-zcta_to_puma = readxl::read_xls("./data/zcta10_to_puma10_nyc.xls", sheet = 2) %>% 
+temp = tempfile(fileext = ".xls")
+dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls"
+download.file(dataURL, destfile=temp, mode='wb')
+
+zcta_to_puma = readxl::read_xls(temp, sheet = 2)%>% 
   select(zcta = zcta10, puma = puma10) %>% 
   mutate(puma = as.numeric(puma))
 
-zip_to_zcta = readxl::read_xls("./data/zip_to_zcta10_nyc.xls", sheet = 2) %>% 
+dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
+download.file(dataURL, destfile=temp, mode='wb')
+zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>% 
   select(zipcode, zcta = zcta5)
 ```
 
@@ -87,7 +93,7 @@ For more info, you can check the data dictionarty "https://www2.census.gov/progr
 Data from The ACS Public Use Microdata Sample files (PUMS), u can find it here "https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=ACS_pums_csv_2011_2015&prodType=document"
 
 This is the ZCTA10 to PUMA10 file
-"http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_puma_neighborhood.xls"
+"http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls"
 
 This thi the ZIP code to ZCTA10 file
 "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
