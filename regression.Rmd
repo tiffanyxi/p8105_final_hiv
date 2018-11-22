@@ -5,6 +5,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(plotly)
 theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5)))
 ```
 
@@ -15,20 +16,43 @@ hiv_data = read_csv("./data/DOHMH_HIV_AIDS_Annual_Report.csv") %>%
   rename(neighborhood = uhf) %>% 
   filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
   mutate(year = as.character(year), age = as.factor(age), gender = as.factor(gender))
+
+income_hiv = read_csv("./data/combine_hiv_income.csv")
 ```
 
 
  
 ```{r}
-hiv_data %>% 
-  filter(age != "All") %>%
-  lm(hiv_diagnoses ~ borough + gender + age + gender*age, data = .) %>% 
+income_hiv %>% 
+  filter(year != "2011" & age != "All") %>%
+  lm(hiv_diagnoses ~ borough + gender + age + mid_income, data = .) %>% 
   summary()
 
-hiv_data %>% 
-  filter(race != "All") %>%
-  lm(hiv_diagnoses ~ gender + race + gender*race, data = .) %>% 
+income_hiv %>% 
+  filter(year != "2011" & race != "All") %>%
+  lm(hiv_diagnoses ~ borough + gender + race + mid_income, data = .) %>% 
   summary()
+
+income_plot = income_hiv %>% 
+  filter(year != "2011") %>% 
+  group_by(uhf, year) %>% 
+  summarise(sum_hiv = mean(hiv_diagnoses), mid_in = median(mid_income)) %>% 
+  ggplot(aes(x = mid_in, y = sum_hiv, color = year)) +
+  geom_point() + 
+  theme_bw() +
+  theme(legend.position = "None")
+ggplotly(income_plot)
+```
+
+Income distribution in different neighborhood
+
+```{r}
+income_dist = income_hiv %>% 
+  ggplot(aes(y = mid_income, x = uhf)) +
+  geom_point(alpha = 0.1) +
+  coord_flip() + 
+  theme_bw()
+ggplotly(income_dist)         
 ```
 
 
