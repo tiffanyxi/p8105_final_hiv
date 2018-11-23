@@ -351,4 +351,94 @@ ggplotly(income_plot_diag_rate)
 
 # 4 map plot
 
+## map_data diagnoses
 
+```{r map_data_diagnoses}
+diagnoses_by_zipcode =  
+  combine_hiv_income %>%
+  filter(gender == "All", age == "All", race == "All") %>% 
+  mutate(zipcode = factor(zipcode)) %>% 
+  group_by(zipcode, uhf) %>% 
+  summarise(sum_diagnoses = sum(hiv_diagnoses), sum_diagnosis_rate = sum(hiv_diagnosis_rate))
+  
+map_data = geo_join(nyc_zipcode, diagnoses_by_zipcode, "postalCode", "zipcode")
+```
+
+## point
+
+```{r point}
+points_spdf = combine_hiv1 %>% 
+  filter(!is.na(lng))
+  
+coordinates(points_spdf) = ~lng + lat
+proj4string(points_spdf) = proj4string(nyc_zipcode)
+matches = over(points_spdf, nyc_zipcode)
+
+points = full_join(matches, rename(diagnoses_by_zipcode, postalCode = zipcode), by = "postalCode")
+```
+
+## map1 diagnoses
+
+```{r map1 diagnoses}
+pal1 = colorNumeric(palette = "Reds", domain = range(map_data@data$sum_diagnoses, na.rm = T))
+# "BuPu" "viridis" "Greens""inferno"
+
+leaflet(map_data) %>%
+  addTiles() %>%  
+  addPolygons(color = "black", weight = 1,
+              fillColor = ~pal1(sum_diagnoses), fillOpacity = 0.8, 
+              popup = ~stringr::str_c(uhf, "  sum:", factor(sum_diagnoses))) %>% 
+  addMarkers(~longitude, ~latitude,
+             popup = ~stringr::str_c(uhf, "  sum:", factor(sum_diagnoses)), data = points) %>%  
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(position = "bottomright", pal = pal1, values = ~sum_diagnoses,
+            title = "The amount of HIV diagnoses", opacity = 0.8) %>% 
+  setView(-73.98, 40.75, zoom = 11)
+```
+
+## map2 diagnoses_rate
+
+```{r map2 diagnoses_rate}
+pal2 = colorNumeric(palette = "Reds", domain = range(map_data@data$sum_diagnosis_rate, na.rm = T))
+# "BuPu" "viridis" "Greens""inferno"
+
+leaflet(map_data) %>%
+  addTiles() %>%  
+  addPolygons(color = "black", weight = 1,
+              fillColor = ~pal1(sum_diagnosis_rate), fillOpacity = 0.8, 
+              popup = ~stringr::str_c(uhf, "  sum:", factor(sum_diagnosis_rate))) %>% 
+  addMarkers(~longitude, ~latitude,
+             popup = ~stringr::str_c(uhf, "  sum:", factor(sum_diagnosis_rate)), data = points) %>%  
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(position = "bottomright", pal = pal2, values = ~sum_diagnosis_rate,
+            title = "The amount of HIV diagnosis rate", opacity = 0.8) %>% 
+  setView(-73.98, 40.75, zoom = 11)
+```
+
+## map_data_income
+```{r map_data_income}
+income_by_zipcode = 
+  combine_hiv_income %>% 
+  filter(year != "2011") %>% 
+  filter(gender == "All", age == "All", race == "All") %>% 
+  group_by(zipcode, uhf) %>% 
+  summarise(mean_income = mean(mid_income))
+  
+map_data_income = geo_join(nyc_zipcode, income_by_zipcode, "postalCode", "zipcode")
+```
+
+## map3
+
+```{r map3}
+pal3 = colorNumeric(palette = "Greens", domain = range(map_data_income@data$mean_income, na.rm = T))
+
+leaflet(map_data_income) %>%
+  addTiles() %>%  
+  addPolygons(color = "black", weight = 1,
+              fillColor = ~pal3(mean_income), fillOpacity = 0.8, 
+              popup = ~stringr::str_c(uhf, "  sum:", factor(mean_income))) %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(position = "bottomright", pal = pal3, values = ~mean_income,
+            title = "Mean income of each uhf", opacity = 0.8) %>% 
+  setView(-73.98, 40.75, zoom = 11)
+```

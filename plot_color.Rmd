@@ -83,7 +83,7 @@ map_data_income = geo_join(nyc_zipcode, income_by_zipcode, "postalCode", "zipcod
 ## map3
 
 ```{r}
-pal3 = colorNumeric(palette = "Greens", domain = range(map_data2@data$mean_income, na.rm = T))
+pal3 = colorNumeric(palette = "Greens", domain = range(map_data_income@data$mean_income, na.rm = T))
 
 leaflet(map_data_income) %>%
   addTiles() %>%  
