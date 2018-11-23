@@ -5,7 +5,7 @@ output: html_document
 
 Variables in global environment shown in "final_report.Rmd" #1 tidy data
 
-## map_data
+## map_data diagnoses
 
 ```{r}
 diagnoses_by_zipcode =  
@@ -20,38 +20,55 @@ map_data = geo_join(nyc_zipcode, diagnoses_by_zipcode, "postalCode", "zipcode")
 
 ## point diagnoses_by_zipcode
 ```{r}
-points_spdf = read.csv("./data/combine_hiv_pin.csv")
-
+points_spdf = combine_hiv1 %>% 
+  filter(!is.na(lng))
+  
 coordinates(points_spdf) = ~lng + lat
 proj4string(points_spdf) = proj4string(nyc_zipcode)
 matches = over(points_spdf, nyc_zipcode)
 
-diagnoses_by_postalcode = diagnoses_by_zipcode %>% 
-  rename(postalCode = zipcode)
-
-points = full_join(matches, diagnoses_by_postalcode, by = "postalCode")
+points = full_join(matches, rename(diagnoses_by_zipcode, postalCode = zipcode), by = "postalCode")
 ```
 
-## map1
+## map1 diagnoses
 
 ```{r}
-pal = colorNumeric(palette = "Reds", domain = range(map_data@data$sum_hiv_diagnoses, na.rm = T))
+pal1 = colorNumeric(palette = "Reds", domain = range(map_data@data$sum_diagnoses, na.rm = T))
 # "BuPu" "viridis" "Greens""inferno"
 
 leaflet(map_data) %>%
   addTiles() %>%  
   addPolygons(color = "black", weight = 1,
-              fillColor = ~pal(sum_hiv_diagnoses), fillOpacity = 0.8, 
-              popup = ~stringr::str_c(uhf, "  sum:", factor(sum_hiv_diagnoses))) %>% 
+              fillColor = ~pal1(sum_diagnoses), fillOpacity = 0.8, 
+              popup = ~stringr::str_c(uhf, "  sum:", factor(sum_diagnoses))) %>% 
   addMarkers(~longitude, ~latitude,
-             popup = ~stringr::str_c(uhf, "  sum:", factor(sum_hiv_diagnoses)), data = points) %>%  
+             popup = ~stringr::str_c(uhf, "  sum:", factor(sum_diagnoses)), data = points) %>%  
   addProviderTiles("CartoDB.Positron") %>%
-  addLegend(position = "bottomright", pal = pal, values = ~sum_hiv_diagnoses,
+  addLegend(position = "bottomright", pal = pal1, values = ~sum_diagnoses,
             title = "The amount of HIV diagnoses", opacity = 0.8) %>% 
   setView(-73.98, 40.75, zoom = 11)
 ```
 
-## color income
+## map2 diagnoses_rate
+
+```{r}
+pal2 = colorNumeric(palette = "Reds", domain = range(map_data@data$sum_diagnosis_rate, na.rm = T))
+# "BuPu" "viridis" "Greens""inferno"
+
+leaflet(map_data) %>%
+  addTiles() %>%  
+  addPolygons(color = "black", weight = 1,
+              fillColor = ~pal1(sum_diagnosis_rate), fillOpacity = 0.8, 
+              popup = ~stringr::str_c(uhf, "  sum:", factor(sum_diagnosis_rate))) %>% 
+  addMarkers(~longitude, ~latitude,
+             popup = ~stringr::str_c(uhf, "  sum:", factor(sum_diagnosis_rate)), data = points) %>%  
+  addProviderTiles("CartoDB.Positron") %>%
+  addLegend(position = "bottomright", pal = pal2, values = ~sum_diagnosis_rate,
+            title = "The amount of HIV diagnosis rate", opacity = 0.8) %>% 
+  setView(-73.98, 40.75, zoom = 11)
+```
+
+## map_data_income
 ```{r}
 income_by_zipcode = 
   combine_hiv_income %>% 
@@ -60,21 +77,21 @@ income_by_zipcode =
   group_by(zipcode, uhf) %>% 
   summarise(mean_income = mean(mid_income))
   
-map_data2 = geo_join(nyc_zipcode, income_by_zipcode, "postalCode", "zipcode")
+map_data_income = geo_join(nyc_zipcode, income_by_zipcode, "postalCode", "zipcode")
 ```
 
-## map2
+## map3
 
 ```{r}
-pal2 = colorNumeric(palette = "Greens", domain = range(map_data2@data$mean_income, na.rm = T))
+pal3 = colorNumeric(palette = "Greens", domain = range(map_data2@data$mean_income, na.rm = T))
 
-leaflet(map_data2) %>%
+leaflet(map_data_income) %>%
   addTiles() %>%  
   addPolygons(color = "black", weight = 1,
-              fillColor = ~pal2(mean_income), fillOpacity = 0.8, 
+              fillColor = ~pal3(mean_income), fillOpacity = 0.8, 
               popup = ~stringr::str_c(uhf, "  sum:", factor(mean_income))) %>% 
   addProviderTiles("CartoDB.Positron") %>%
-  addLegend(position = "bottomright", pal = pal2, values = ~mean_income,
+  addLegend(position = "bottomright", pal = pal3, values = ~mean_income,
             title = "Mean income of each uhf", opacity = 0.8) %>% 
   setView(-73.98, 40.75, zoom = 11)
 ```
