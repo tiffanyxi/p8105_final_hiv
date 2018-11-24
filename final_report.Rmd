@@ -23,7 +23,7 @@ theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = el
 
 # 1 tidy data
 
-```{r import_data}
+```{r import_data, message=FALSE}
 UHF_zipcode = 
   read_csv("./data/appb.csv") %>% 
   slice(-43) %>% 
@@ -32,7 +32,7 @@ UHF_zipcode =
   janitor::clean_names()
 ```
 
-```{r combine_data, warning=FALSE}
+```{r combine_data, warning=FALSE, message=FALSE}
 raw_hiv = 
   GET("https://data.cityofnewyork.us/api/views/fju2-rdad/rows.csv") %>% 
   content("parsed") %>% 
@@ -50,7 +50,7 @@ combine_hiv =
   select(zipcode, everything(), -zip_code)
 ```
 
-```{r pin_data}
+```{r pin_data, message=FALSE}
 r = GET('http://data.beta.nyc//dataset/3bf5fb73-edb5-4b05-bb29-7c95f4a727fc/resource/6df127b1-6d04-4bb7-b983-07402a2c3f90/download/f4129d9aa6dd4281bc98d0f701629b76nyczipcodetabulationareas.geojson')
 nyc_zipcode = readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
@@ -67,7 +67,7 @@ combine_hiv1 =
   filter(!(uhf == "Pelhem - Throgs Neck"))
 ```
 
-```{r add data source}
+```{r load_income_data, warning=FALSE, message=FALSE}
 pums_raw = read_csv("./data/selected_pums.csv")
 
 temp = tempfile(fileext = ".xls")
@@ -80,15 +80,14 @@ zcta_to_puma = readxl::read_xls(temp, sheet = 2) %>%
   select(zcta = zcta10, puma = puma10) %>% 
   mutate(puma = as.numeric(puma))
 
-dataURL =
-  "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
+dataURL = "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
 
 download.file(dataURL, destfile = temp, mode = 'wb')
 zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>% 
   select(zipcode, zcta = zcta5) 
 ```
 
-```{r pums data wrangling}
+```{r income_data_wrangling}
 pums_data = 
   pums_raw %>% 
   select(puma = PUMA10, income = PINCP, year = ADJINC) %>% 
