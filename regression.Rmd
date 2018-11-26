@@ -3,20 +3,126 @@ title: "Regression"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, echo = FALSE}
 library(tidyverse)
 library(plotly)
+library(rvest)
+library(httr)
+library(tigris)
+library(dplyr)
+library(leaflet)
+library(sp)
+library(ggmap)
+library(maptools)
+library(broom)
+library(httr)
+library(rgdal)
 theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-
-```{r message = FALSE, echo = FALSE}
-income_hiv = read_csv("./data/combine_hiv_income.csv")
+```{r import_data, message=FALSE, echo = FALSE}
+UHF_zipcode = 
+  read_csv("./data/appb.csv") %>% 
+  slice(-43) %>% 
+  select(-Borough) %>% 
+  rename("UHF" = "UHF Neighborhood") %>% 
+  janitor::clean_names()
 ```
 
-## Hiv diagnoses
+```{r combine_data, warning=FALSE, message=FALSE, echo = FALSE}
+raw_hiv = 
+  GET("https://data.cityofnewyork.us/api/views/fju2-rdad/rows.csv") %>% 
+  content("parsed") %>% 
+  janitor::clean_names()
 
-```{r}
+combine_hiv = 
+  right_join(UHF_zipcode, raw_hiv, by = "uhf") %>%
+  janitor::clean_names() %>% 
+  separate(zip_code, into = c("zipcode1", "zipcode2", "zipcode3", 
+                              "zipcode4", "zipcode5", "zipcode6", "zipcode7", "zipcode8",
+                              "zipcode9"), sep = ", ") %>% 
+  gather(key = zip_code, value = zipcode_value, zipcode1:zipcode9) %>% 
+  filter(!is.na(zipcode_value)) %>% 
+  rename("zipcode" = "zipcode_value") %>% 
+  select(zipcode, everything(), -zip_code)
+```
+
+```{r pin_data, message=FALSE, echo = FALSE}
+r = GET('http://data.beta.nyc//dataset/3bf5fb73-edb5-4b05-bb29-7c95f4a727fc/resource/6df127b1-6d04-4bb7-b983-07402a2c3f90/download/f4129d9aa6dd4281bc98d0f701629b76nyczipcodetabulationareas.geojson')
+nyc_zipcode = readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+zipcode_lat_lng = nyc_zipcode@data %>% 
+  select(zipcode = postalCode, longitude, latitude) %>% 
+  mutate(zipcode = as.character(zipcode))
+  
+combine_hiv1 = 
+  full_join(zipcode_lat_lng, combine_hiv, by = "zipcode") %>% 
+  mutate(longitude = as.numeric(longitude), latitude = as.numeric(latitude)) %>% 
+  group_by(uhf) %>% 
+  summarise(lng = mean(longitude),
+            lat = mean(latitude)) %>% 
+  filter(!(uhf == "Pelhem - Throgs Neck"))
+```
+
+```{r load_income_data, warning=FALSE, message=FALSE, echo = FALSE}
+pums_raw = read_csv("./data/selected_pums.csv")
+
+temp = tempfile(fileext = ".xls")
+
+dataURL = "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls"
+
+download.file(dataURL, destfile = temp, mode = 'wb')
+
+zcta_to_puma = readxl::read_xls(temp, sheet = 2) %>% 
+  select(zcta = zcta10, puma = puma10) %>% 
+  mutate(puma = as.numeric(puma))
+
+dataURL = "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
+
+download.file(dataURL, destfile = temp, mode = 'wb')
+zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>% 
+  select(zipcode, zcta = zcta5) 
+```
+
+```{r income_data_wrangling, echo = FALSE}
+pums_data = 
+  pums_raw %>% 
+  select(puma = PUMA10, income = PINCP, year = ADJINC) %>% 
+  filter(puma != -9)  # remove data from 2011 due to lack of area information
+
+pums_data$year = recode(pums_data$year, 
+                        "1042852" = "2012",
+                        "1025215" = "2013",  
+                        "1009585" = "2014", 
+                        "1001264" = "2015")   
+
+pums_data = 
+  pums_data %>% 
+  group_by(year, puma) %>% 
+  summarise(mid_income = median(income, na.rm = TRUE)) %>% 
+  ungroup()         # calculate yearly median income for each area
+```
+
+```{r zipcode match, echo = FALSE}
+puma_to_zipcode = right_join(zip_to_zcta, zcta_to_puma, by = "zcta") %>%   # generaate a puma to zipcode file
+  select(puma, zipcode)
+
+income_zipcode = right_join(pums_data, puma_to_zipcode, by = "puma") %>%  # matching zipcode with median income data
+  select(year, zipcode, mid_income) %>% 
+  mutate(year = as.numeric(year))
+
+combine_hiv_income = 
+  left_join(combine_hiv, income_zipcode, by = c("year", "zipcode"))
+
+income_hiv = combine_hiv_income
+```
+
+
+## HIV diagnoses regression
+
+### Income vs HIV
+
+```{r echo = FALSE}
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_diagnoses ~ borough + gender + age + mid_income, data = .) %>% 
@@ -39,40 +145,44 @@ income_plot = income_hiv %>%
   geom_point() + 
   geom_smooth(method = lm) +
   theme_bw() +
-  theme(legend.position = "None")
+  theme(legend.position = "None") +
+  labs(
+        title = "Income Influence on HIV Incidence",
+        x = "Average income of each neighborhood",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      )
 ggplotly(income_plot)
 ```
 
-Income distribution in different neighborhood
+**Interpretation**:
 
-```{r}
-income_dist = income_hiv %>% 
-  ggplot(aes(y = mid_income, x = uhf)) +
-  geom_point(alpha = 0.1) +
-  coord_flip() +
-  theme_bw()
-ggplotly(income_dist)         
-```
+According to the scatterplot of income vs HIV diagnoses, it is obvious that the points are mostly concentrated in low income neigbourhood and the number of HIV diagnoses in high average income area( > 60000/year) centered in less than 1000 cases/neigbourhood. This result is exactly what we expected, because low-income community are tend to have insufficient healthcare supply, less insurance coverage, poor education level and inadequate epidemiology awareness, which could jointly cause the relatively high HIV incidence. So, we intend to advocate the related authorities to spare more public health resource in low-to-median-income neigbourhood to raise public awareness of HIV prevention knowledge and increase budgets of medical facilities in those areas.
 
-## Hiv related death rate
+Limitations:
 
-```{r}
+We can not visualize the effect of age and race at the same time.
+
+
+### HIV related death rate
+
+```{r echo = FALSE}
 income_hiv %>% 
-  filter(year != "2011" & age != "All") %>%
+  filter(year != "2011" & age != "All" & hiv_related_death_rate != 99999) %>%
   lm(hiv_related_death_rate ~ borough + gender + age + mid_income, data = .) %>% 
   summary() %>% 
   broom::tidy() %>% 
   knitr::kable(digits = 3)
 
 income_hiv %>% 
-  filter(year != "2011" & race != "All") %>%
+  filter(year != "2011" & race != "All" & hiv_related_death_rate != 99999) %>%
   lm(hiv_related_death_rate ~ borough + gender + race + mid_income, data = .) %>% 
   summary() %>% 
   broom::tidy() %>% 
   knitr::kable(digits = 3)
 
 income_plot2 = income_hiv %>% 
-  filter(year != "2011") %>% 
+  filter(year != "2011" & hiv_related_death_rate != 99999) %>% 
   group_by(uhf, year) %>% 
   summarise(sum_hiv_related_death = sum(hiv_related_death_rate), mid_in = median(mid_income)) %>% 
   ggplot(aes(x = mid_in, y = sum_hiv_related_death, color = year)) +
@@ -80,12 +190,17 @@ income_plot2 = income_hiv %>%
   geom_smooth(method = lm) +
   theme_bw() +
   theme(legend.position = "None")
+
 ggplotly(income_plot2)
 ```
+**Interpretation**:
+
+
+
 
 ## HIV diagnosis rate
 
-```{r}
+```{r , echo = FALSE}
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_diagnosis_rate ~ borough + gender + age + mid_income, data = .) %>% 
@@ -109,6 +224,7 @@ income_plot_diag_rate = income_hiv %>%
   geom_smooth(method = lm) +
   theme_bw() +
   theme(legend.position = "None")
+
 ggplotly(income_plot_diag_rate)
 ```
 

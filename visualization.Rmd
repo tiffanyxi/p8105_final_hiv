@@ -22,7 +22,7 @@ theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = el
 
 First, import and tidy data:
 
-```{r import_data, message=FALSE}
+```{r import_data, message=FALSE, echo = FALSE}
 UHF_zipcode = 
   read_csv("./data/appb.csv") %>% 
   slice(-43) %>% 
@@ -31,7 +31,7 @@ UHF_zipcode =
   janitor::clean_names()
 ```
 
-```{r combine_data, warning=FALSE, message=FALSE}
+```{r combine_data, warning=FALSE, message=FALSE, echo = FALSE}
 raw_hiv = 
   GET("https://data.cityofnewyork.us/api/views/fju2-rdad/rows.csv") %>% 
   content("parsed") %>% 
@@ -49,7 +49,7 @@ combine_hiv =
   select(zipcode, everything(), -zip_code)
 ```
 
-```{r pin_data, message=FALSE}
+```{r pin_data, message=FALSE, echo = FALSE}
 r = GET('http://data.beta.nyc//dataset/3bf5fb73-edb5-4b05-bb29-7c95f4a727fc/resource/6df127b1-6d04-4bb7-b983-07402a2c3f90/download/f4129d9aa6dd4281bc98d0f701629b76nyczipcodetabulationareas.geojson')
 nyc_zipcode = readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
@@ -66,7 +66,7 @@ combine_hiv1 =
   filter(!(uhf == "Pelhem - Throgs Neck"))
 ```
 
-```{r load_income_data, warning=FALSE, message=FALSE}
+```{r load_income_data, warning=FALSE, message=FALSE, echo = FALSE}
 pums_raw = read_csv("./data/selected_pums.csv")
 
 temp = tempfile(fileext = ".xls")
@@ -86,7 +86,7 @@ zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>%
   select(zipcode, zcta = zcta5) 
 ```
 
-```{r income_data_wrangling}
+```{r income_data_wrangling, echo = FALSE}
 pums_data = 
   pums_raw %>% 
   select(puma = PUMA10, income = PINCP, year = ADJINC) %>% 
@@ -105,7 +105,7 @@ pums_data =
   ungroup()         # calculate yearly median income for each area
 ```
 
-```{r zipcode match}
+```{r zipcode match, echo = FALSE}
 puma_to_zipcode = right_join(zip_to_zcta, zcta_to_puma, by = "zcta") %>%   # generaate a puma to zipcode file
   select(puma, zipcode)
 
@@ -122,7 +122,7 @@ hiv_data = raw_hiv
 
 gender neighborhood VS hiv
 
-```{r fig.width = 8, fig.height = 6}
+```{r fig.width = 8, fig.height = 6, echo = FALSE}
 neb_plot = hiv_data %>% 
   group_by(uhf, gender) %>% 
   filter(year != "ALL", borough != "All", uhf != "All", gender != "All") %>% 
@@ -146,7 +146,7 @@ The number of HIV diagnoses is apperently higher among male subgroups than femal
 ### Gender, age vs hiv
 
 * Omit the data of transgender group, because the data of transgender were not divided into specific age groups.
-```{r fig.width = 8, fig.height = 6}
+```{r fig.width = 8, fig.height = 6, echo = FALSE}
 age_plot = hiv_data %>% 
   filter(race == "All" & borough == "All" & age != "All") %>% 
   group_by(gender, age) %>% 
@@ -171,7 +171,7 @@ As is shown in the barchart above, in every age range, HIV incidence rate in mal
 
 ### Gender race vs hiv
 
-```{r fig.width = 8, fig.height = 6}
+```{r fig.width = 8, fig.height = 6, echo = FALSE}
 race_plot = hiv_data %>% 
   filter(age == "All" & borough == "All" & race != "All") %>% 
   group_by(gender, race) %>% 
@@ -194,12 +194,13 @@ By race/ethnicity, black men/women have the highest rates of new HIV infections 
 
 hiv diagnoses in borough with most hiv over years
 
-```{r specific_year} 
+```{r specific_year, echo = FALSE} 
 hiv_data %>%
   filter(borough != "All", uhf == "All", gender == "All", age == "All", race == "All") %>% 
   group_by(borough) %>% 
   summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
-  arrange(desc(sum_hiv))
+  arrange(desc(sum_hiv)) %>% 
+  knitr::kable()
 
 year_plot = hiv_data %>% 
   mutate(year = as.integer(year)) %>% 
@@ -219,7 +220,7 @@ ggplotly(year_plot)
 ```
 
 
-```{r overall_year}
+```{r overall_year, echo = FALSE}
 overall_year = hiv_data %>%
   filter(borough == "All", uhf == "All", age == "All", race == "All") %>% 
   group_by(year, gender) %>% 
@@ -239,28 +240,5 @@ ggplotly(overall_year)
 The overall trend of total HIV incidence among study population in NYC on the decline from 2011 to 2015. The decrease in male is much significant than in female, and not very obvious in transgender group for theie low base account. The downward trend in HIV incidence rate reflects the improvment of public health practice affect the HIV incidence rate through repeated exposure to counseling (such as the promotion of condom use or safe sex or other prevention messages) and the advances in HIV treatments.
 
 
-## Income vs Hiv
 
-```{r}
-income_plot = combine_hiv_income %>% 
-  filter(year != 2011, gender == "All", age == "All", race == "All") %>% 
-  group_by(uhf) %>%
-  summarise(sum_hiv = sum(hiv_diagnoses), mean_income = mean(mid_income)) %>% 
-  ggplot(aes(x = mean_income, y = sum_hiv)) + 
-  geom_point() +
-  labs(
-        title = "Income Influence on HIV Incidence",
-        x = "Average income of each neighborhood",
-        y = "HIV diagnoses",
-        caption = "Data from the ..."
-      )
 
-ggplotly(income_plot)
-```
-
-**Interpretation**:
-According to the scatterplot of income vs HIV diagnoses, it is obvious that the points are mostly concentrated in low income neigbourhood and the number of HIV diagnoses in high average income area( > 60000/year) centered in less than 1000 cases/neigbourhood. This result is exactly what we expected, because low-income community are tend to have insufficient healthcare supply, less insurance coverage, poor education level and inadequate epidemiology awareness, which could jointly cause the relatively high HIV incidence. So, we intend to advocate the related authorities to spare more public health resource in low-to-median-income neigbourhood to raise public awareness of HIV prevention knowledge and increase budgets of medical facilities in those areas.
-
-Limitations:
-
-We can not visualize the effect of age and race at the same time.
