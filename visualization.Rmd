@@ -20,8 +20,6 @@ library(rgdal)
 theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-First, import and tidy data:
-
 ```{r import_data, message=FALSE, echo = FALSE}
 UHF_zipcode = 
   read_csv("./data/appb.csv") %>% 
@@ -120,7 +118,7 @@ hiv_data = raw_hiv
 ```
 
 
-gender neighborhood VS hiv
+### Gender, Neighborhood vs HIV
 
 ```{r fig.width = 8, fig.height = 6, echo = FALSE}
 neb_plot = hiv_data %>% 
@@ -140,10 +138,10 @@ neb_plot = hiv_data %>%
 
 ggplotly(neb_plot)
 ```
-**Interpretation**:
+
 The number of HIV diagnoses is apperently higher among male subgroups than female in all neighborhoods. Beford Stuyvesant - Crown Heights have the highest total HIV diagnoses and highest female HIV diagnoses cases. Chelsea - Clinton ranks first in male HIV diagnoses. Bayside - Little Neck has lowest number of HIV diagnoses for both male and female.
 
-### Gender, age vs hiv
+### Gender, age vs HIV
 
 * Omit the data of transgender group, because the data of transgender were not divided into specific age groups.
 ```{r fig.width = 8, fig.height = 6, echo = FALSE}
@@ -165,11 +163,10 @@ ggplotly(age_plot)
 
 ```
 
-**Interpretation**:
 As is shown in the barchart above, in every age range, HIV incidence rate in male is significantly higher than that in female population. The potential explaination could be the gender differences with respect to HIV/AIDS depend on patterns of disease transmission. Most infections occurred in adults aged 20 to 29 years, and the incidence porpotion declines as the increase of age.
 
 
-### Gender, race vs hiv
+### Gender, race vs HIV/mortality
 
 ```{r fig.width = 8, fig.height = 6, echo = FALSE}
 race_plot = hiv_data %>% 
@@ -187,8 +184,13 @@ race_plot = hiv_data %>%
       ) 
 
 ggplotly(race_plot)
+
+
 ```
-```{r fig.width = 8, fig.height = 6, echo = FALSE}
+
+By race/ethnicity, black men/women have the highest rates of new HIV infections among all men/women. Whereas the incidence rate among Asian/Pacific Islander is the lowest given the study population in NYC. This is because some race population groups have higher rates of HIV in their communities, thus raising the risk of new infections with each sexual or drug use encounter. Plus, social, economic, and demographic factors of various race group—such as stigma, discrimination, income, education, and geographic region—could also affect their risk for HIV. 
+
+```{r HIV-related-death_rate, fig.width = 8, fig.height = 6, echo = FALSE}
 race_plot = hiv_data %>% 
   filter(age == "All" & borough == "All" & race != "All" & hiv_related_death_rate!= 99999) %>% 
   group_by(gender, race) %>% 
@@ -197,7 +199,7 @@ race_plot = hiv_data %>%
   geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
   scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
   labs(
-        title = "Race and Gender Influence on HIV Incidence",
+        title = "Race and Gender Influence on HIV-related-death_rate",
         x = "Race",
         y = "HIV diagnoses",
         caption = "Data from the ..."
@@ -206,8 +208,8 @@ race_plot = hiv_data %>%
 ggplotly(race_plot)
 ```
 
-**Interpretation**:
-By race/ethnicity, black men/women have the highest rates of new HIV infections among all men/women. Whereas the incidence rate among Asian/Pacific Islander is the lowest given the study population in NYC. This is because some race population groups have higher rates of HIV in their communities, thus raising the risk of new infections with each sexual or drug use encounter. Plus, social, economic, and demographic factors of various race group—such as stigma, discrimination, income, education, and geographic region—could also affect their risk for HIV. 
+However, if we compare the plot of HIV Incidence with the plot of HIV related death rate, we will notice that although the HIV incidence in male is much higher than female, the HIV related death rate in women is higher than that of men in some race, like White and Latino/Hispanic. We can draw the conclusion that women infected with HIV disease are more vulnerable than men with HIV disease. Other possible explaination could be male are more likely to get access to the HIV treatment than women, reflecting the gender inequality of social status.
+
 
 ### HIV diagnoses in borough with most HIV over years
 
@@ -228,8 +230,8 @@ overall_year = hiv_data %>%
 ggplotly(overall_year)
 ```
 
-**Interpretation**:
-The overall trend of total HIV incidence among study population in NYC on the decline from 2011 to 2015. The decrease in male is much significant than in female, and not very obvious in transgender group for theie low base account. The downward trend in HIV incidence rate reflects the improvment of public health practice affect the HIV incidence rate through repeated exposure to counseling (such as the promotion of condom use or safe sex or other prevention messages) and the advances in HIV treatments.
+
+The overall trend of total HIV incidence among study population in NYC on the decline from 2011 to 2015. The decrease in male is much significant than in female, and not very obvious in transgender group for their low base account. The downward trend in HIV incidence rate reflects the improvment of public health practice affect the HIV incidence rate through repeated exposure to counseling (such as the promotion of condom use or safe sex or other prevention messages) and the advances in HIV treatments.
 
 
 
