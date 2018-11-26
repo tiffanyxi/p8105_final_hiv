@@ -22,8 +22,9 @@ theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = el
 ```
 
 **Background and Objectives:**
-Human immunodeficiency virus infection and acquired immune deficiency syndrome (HIV/AIDS) is a spectrum of conditions caused by infection with the human immunodeficiency virus (HIV).
-In this project, we aim to study the relationships between characteristics of patients and the HIV/AIDS Diagnoses Outcome in New York City from 2011 to 2015.
+Infection by human immunodeficiency virus (HIV) may lead to acquired immunodeficiency syndrome (AIDS) and continues to be a global public health problem, with an estimated 37 million individuals worldwide who are HIV-positive. New York City has the oldest and largest HIV epidemic in the United States, and it also so leads the nation in the number of new HIV cases nowadays.
+In this project, we aim to study the relationships between different characteristics of patients and the HIV/AIDS Diagnosis Outcome in New York City from 2011 to 2015.
+
 
 
 **Data Sources:**
