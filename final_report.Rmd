@@ -288,9 +288,9 @@ hiv_data_reg = raw_hiv %>%
 income_hiv = combine_hiv_income
 ```
 
-## Hiv diagnoses
+## HIV diagnoses
 
-```{r}
+```{r echo = FALSE}
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_diagnoses ~ borough + gender + age + mid_income, data = .) %>% 
@@ -300,96 +300,39 @@ income_hiv %>%
 
 income_hiv %>% 
   filter(year != "2011" & race != "All") %>%
+  mutate(race = fct_relevel(race, "White")) %>% 
   lm(hiv_diagnoses ~ borough + gender + race + mid_income, data = .) %>% 
   summary() %>% 
   broom::tidy() %>% 
   knitr::kable(digits = 3)
-
-income_plot = income_hiv %>% 
-  filter(year != "2011") %>% 
-  group_by(uhf, year) %>% 
-  summarise(sum_hiv = sum(hiv_diagnoses), mid_in = median(mid_income)) %>% 
-  ggplot(aes(x = mid_in, y = sum_hiv, color = year)) +
-  geom_point() + 
-  geom_smooth(method = lm) +
-  theme_bw() +
-  theme(legend.position = "None")
-ggplotly(income_plot)
 ```
 
-Income distribution in different neighborhood
+**Interpretation**:
+HIV incidence among male are significantly higher than that among female, which can be explained by gender differences with respect to HIV/AIDS depend on patterns of disease transmission. HIV incidence in adults aged 20 to 29, 30 to 39, 40 to 49 and 50 to 59 are all significantly higher than young people aged 13 to 19. HIV incidence in Black and Latino/Hispanic population are significantly higher than that in white population. The effect of income is not significant.
 
-```{r}
-income_dist = income_hiv %>% 
-  ggplot(aes(y = mid_income, x = uhf)) +
-  geom_point(alpha = 0.1) +
-  coord_flip() +
-  theme_bw()
-ggplotly(income_dist)         
-```
+## HIV related death rate
 
-## Hiv related death rate
-
-```{r}
+```{r echo = FALSE}
 income_hiv %>% 
-  filter(year != "2011" & age != "All") %>%
+  filter(year != "2011" & age != "All" & hiv_related_death_rate != 99999) %>%
   lm(hiv_related_death_rate ~ borough + gender + age + mid_income, data = .) %>% 
   summary() %>% 
   broom::tidy() %>% 
   knitr::kable(digits = 3)
 
 income_hiv %>% 
-  filter(year != "2011" & race != "All") %>%
+  filter(year != "2011" & race != "All" & hiv_related_death_rate != 99999) %>%
+  mutate(race = fct_relevel(race, "White")) %>%
   lm(hiv_related_death_rate ~ borough + gender + race + mid_income, data = .) %>% 
   summary() %>% 
   broom::tidy() %>% 
   knitr::kable(digits = 3)
-
-income_plot2 = income_hiv %>% 
-  filter(year != "2011") %>% 
-  group_by(uhf, year) %>% 
-  summarise(sum_hiv_related_death = sum(hiv_related_death_rate), mid_in = median(mid_income)) %>% 
-  ggplot(aes(x = mid_in, y = sum_hiv_related_death, color = year)) +
-  geom_point() + 
-  geom_smooth(method = lm) +
-  theme_bw() +
-  theme(legend.position = "None")
-ggplotly(income_plot2)
 ```
 
 **Interpretation**:
-According to the scatterplot of income vs HIV diagnoses, it is obvious that the points are mostly concentrated in low income neigbourhood and the number of HIV diagnoses in high average income area( > 60000/year) centered in less than 1000 cases/neigbourhood. This result is exactly what we expected, because low-income community are tend to have insufficient healthcare supply, less insurance coverage, poor education level and inadequate epidemiology awareness, which could jointly cause the relatively high HIV incidence. So, we intend to advocate the related authorities to spare more public health resource in low-to-median-income neigbourhood to raise public awareness of HIV prevention knowledge and increase budgets of medical facilities in those areas.
+HIV related death rate among male are lower than that among female, which is adverse to the effect of sex on HIV diagnoses. This result indicates that the restricted social autonomy of women and young girls can reduce their ability to access sexual health and HIV services. HIV related death rate in adults aged 20 or older are significantly higher than young people aged 13 to 19, and this rate increased as the increase of age. HIV related death rate in Latino/Hispanic population are significantly higher than that in white population, which may be explained by unequal access to HIV treatments. The effect of income is not significant.
 
-## HIV diagnosis rate
-
-```{r}
-income_hiv %>% 
-  filter(year != "2011" & age != "All") %>%
-  lm(hiv_diagnosis_rate ~ borough + gender + age + mid_income, data = .) %>% 
-  summary() %>% 
-  broom::tidy() %>% 
-  knitr::kable(digits = 3)
-
-income_hiv %>% 
-  filter(year != "2011" & race != "All") %>%
-  lm(hiv_diagnosis_rate ~ borough + gender + race + mid_income, data = .) %>% 
-  summary() %>% 
-  broom::tidy() %>% 
-  knitr::kable(digits = 3)
-
-income_plot_diag_rate = income_hiv %>% 
-  filter(year != "2011") %>% 
-  group_by(uhf, year) %>% 
-  summarise(sum_hiv_diagnosis_rate = sum(hiv_diagnosis_rate), mid_in = median(mid_income)) %>% 
-  ggplot(aes(x = mid_in, y = sum_hiv_diagnosis_rate, color = year)) +
-  geom_point() + 
-  geom_smooth(method = lm) +
-  theme_bw() +
-  theme(legend.position = "None")
-ggplotly(income_plot_diag_rate)
-```
-
-# 4 map plot
+# 4 Map plot
 
 ## map_data diagnoses
 
