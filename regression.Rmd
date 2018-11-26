@@ -3,7 +3,7 @@ title: "Regression"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, echo = FALSE}
 library(tidyverse)
 library(plotly)
 library(rvest)
@@ -20,7 +20,7 @@ library(rgdal)
 theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5)))
 ```
 
-```{r import_data, message=FALSE}
+```{r import_data, message=FALSE, echo = FALSE}
 UHF_zipcode = 
   read_csv("./data/appb.csv") %>% 
   slice(-43) %>% 
@@ -29,7 +29,7 @@ UHF_zipcode =
   janitor::clean_names()
 ```
 
-```{r combine_data, warning=FALSE, message=FALSE}
+```{r combine_data, warning=FALSE, message=FALSE, echo = FALSE}
 raw_hiv = 
   GET("https://data.cityofnewyork.us/api/views/fju2-rdad/rows.csv") %>% 
   content("parsed") %>% 
@@ -47,7 +47,7 @@ combine_hiv =
   select(zipcode, everything(), -zip_code)
 ```
 
-```{r pin_data, message=FALSE}
+```{r pin_data, message=FALSE, echo = FALSE}
 r = GET('http://data.beta.nyc//dataset/3bf5fb73-edb5-4b05-bb29-7c95f4a727fc/resource/6df127b1-6d04-4bb7-b983-07402a2c3f90/download/f4129d9aa6dd4281bc98d0f701629b76nyczipcodetabulationareas.geojson')
 nyc_zipcode = readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
 
@@ -64,7 +64,7 @@ combine_hiv1 =
   filter(!(uhf == "Pelhem - Throgs Neck"))
 ```
 
-```{r load_income_data, warning=FALSE, message=FALSE}
+```{r load_income_data, warning=FALSE, message=FALSE, echo = FALSE}
 pums_raw = read_csv("./data/selected_pums.csv")
 
 temp = tempfile(fileext = ".xls")
@@ -84,7 +84,7 @@ zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>%
   select(zipcode, zcta = zcta5) 
 ```
 
-```{r income_data_wrangling}
+```{r income_data_wrangling, echo = FALSE}
 pums_data = 
   pums_raw %>% 
   select(puma = PUMA10, income = PINCP, year = ADJINC) %>% 
@@ -103,7 +103,7 @@ pums_data =
   ungroup()         # calculate yearly median income for each area
 ```
 
-```{r zipcode match}
+```{r zipcode match, echo = FALSE}
 puma_to_zipcode = right_join(zip_to_zcta, zcta_to_puma, by = "zcta") %>%   # generaate a puma to zipcode file
   select(puma, zipcode)
 
@@ -122,7 +122,7 @@ income_hiv = combine_hiv_income
 
 ### Income vs HIV
 
-```{r}
+```{r echo = FALSE}
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_diagnoses ~ borough + gender + age + mid_income, data = .) %>% 
@@ -166,7 +166,7 @@ We can not visualize the effect of age and race at the same time.
 
 ### HIV related death rate
 
-```{r}
+```{r echo = FALSE}
 income_hiv %>% 
   filter(year != "2011" & age != "All" & hiv_related_death_rate != 99999) %>%
   lm(hiv_related_death_rate ~ borough + gender + age + mid_income, data = .) %>% 
@@ -200,7 +200,7 @@ ggplotly(income_plot2)
 
 ## HIV diagnosis rate
 
-```{r}
+```{r , echo = FALSE}
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_diagnosis_rate ~ borough + gender + age + mid_income, data = .) %>% 
