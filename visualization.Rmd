@@ -211,32 +211,6 @@ By race/ethnicity, black men/women have the highest rates of new HIV infections 
 
 ### HIV diagnoses in borough with most HIV over years
 
-```{r specific_year, echo = FALSE, fig.width = 8, fig.height = 6, fig.cap = 'center'} 
-hiv_data %>%
-  filter(borough != "All", uhf == "All", gender == "All", age == "All", race == "All") %>% 
-  group_by(borough) %>% 
-  summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
-  arrange(desc(sum_hiv)) %>% 
-  knitr::kable()
-
-year_plot = hiv_data %>% 
-  mutate(year = as.integer(year)) %>% 
-  filter(borough == "Brooklyn" & gender == "Male" & age == "20 - 29") %>% 
-  group_by(year, uhf) %>% 
-  summarize(sum_hiv = sum(hiv_diagnoses)) %>% 
-  ggplot(aes(x = year, y = sum_hiv, color = uhf)) +
-  geom_line() +
-  labs(
-        title = "Race and Gender Influence on HIV Incidence",
-        x = "Year",
-        y = "Sum of HIV diagnoses",
-        caption = "Data from the ..."
-      ) 
-  
-ggplotly(year_plot) %>%
-  layout(legend = list(orientation = "h", x = 0.4, y = -0.2))
-```
-
 
 ```{r overall_year, echo = FALSE, fig.width = 8, fig.height = 6}
 overall_year = hiv_data %>%
