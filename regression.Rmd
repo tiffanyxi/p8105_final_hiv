@@ -181,6 +181,7 @@ income_hiv %>%
   broom::tidy() %>% 
   knitr::kable(digits = 3)
 
+
 income_plot2 = income_hiv %>% 
   filter(year != "2011" & hiv_related_death_rate != 99999) %>% 
   group_by(uhf, year) %>% 

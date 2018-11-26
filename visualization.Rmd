@@ -169,7 +169,7 @@ ggplotly(age_plot)
 As is shown in the barchart above, in every age range, HIV incidence rate in male is significantly higher than that in female population. The potential explaination could be the gender differences with respect to HIV/AIDS depend on patterns of disease transmission. Most infections occurred in adults aged 20 to 29 years, and the incidence porpotion declines as the increase of age.
 
 
-### Gender race vs hiv
+### Gender, race vs hiv
 
 ```{r fig.width = 8, fig.height = 6, echo = FALSE}
 race_plot = hiv_data %>% 
@@ -188,13 +188,30 @@ race_plot = hiv_data %>%
 
 ggplotly(race_plot)
 ```
+```{r fig.width = 8, fig.height = 6, echo = FALSE}
+race_plot = hiv_data %>% 
+  filter(age == "All" & borough == "All" & race != "All" & hiv_related_death_rate!= 99999) %>% 
+  group_by(gender, race) %>% 
+  summarise(sum_hiv = sum(hiv_related_death_rate)) %>% 
+  ggplot(aes(y = sum_hiv, x = reorder(race, sum_hiv), fill = gender)) + 
+  geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
+  scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
+  labs(
+        title = "Race and Gender Influence on HIV Incidence",
+        x = "Race",
+        y = "HIV diagnoses",
+        caption = "Data from the ..."
+      ) 
+
+ggplotly(race_plot)
+```
 
 **Interpretation**:
 By race/ethnicity, black men/women have the highest rates of new HIV infections among all men/women. Whereas the incidence rate among Asian/Pacific Islander is the lowest given the study population in NYC. This is because some race population groups have higher rates of HIV in their communities, thus raising the risk of new infections with each sexual or drug use encounter. Plus, social, economic, and demographic factors of various race group—such as stigma, discrimination, income, education, and geographic region—could also affect their risk for HIV. 
 
-hiv diagnoses in borough with most hiv over years
+### HIV diagnoses in borough with most HIV over years
 
-```{r specific_year, echo = FALSE} 
+```{r specific_year, echo = FALSE, fig.width = 8, fig.height = 6, fig.cap = 'center'} 
 hiv_data %>%
   filter(borough != "All", uhf == "All", gender == "All", age == "All", race == "All") %>% 
   group_by(borough) %>% 
@@ -216,11 +233,12 @@ year_plot = hiv_data %>%
         caption = "Data from the ..."
       ) 
   
-ggplotly(year_plot)
+ggplotly(year_plot) %>%
+  layout(legend = list(orientation = "h", x = 0.4, y = -0.2))
 ```
 
 
-```{r overall_year, echo = FALSE}
+```{r overall_year, echo = FALSE, fig.width = 8, fig.height = 6}
 overall_year = hiv_data %>%
   filter(borough == "All", uhf == "All", age == "All", race == "All") %>% 
   group_by(year, gender) %>% 
