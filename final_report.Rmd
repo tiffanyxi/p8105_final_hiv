@@ -282,7 +282,7 @@ income_hiv %>%
 income_plot = income_hiv %>% 
   filter(year != "2011") %>% 
   group_by(uhf, year) %>% 
-  summarise(sum_hiv = mean(hiv_diagnoses), mid_in = median(mid_income)) %>% 
+  summarise(sum_hiv = sum(hiv_diagnoses), mid_in = median(mid_income)) %>% 
   ggplot(aes(x = mid_in, y = sum_hiv, color = year)) +
   geom_point() + 
   geom_smooth(method = lm) +
