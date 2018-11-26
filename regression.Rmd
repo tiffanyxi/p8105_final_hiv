@@ -193,18 +193,10 @@ income_plot2 = income_hiv %>%
 
 ggplotly(income_plot2)
 ```
+**Interpretation**:
 
 
-### Income Distribution in Different Neighborhood
 
-```{r}
-income_dist = income_hiv %>% 
-  ggplot(aes(y = mid_income, x = uhf)) +
-  geom_point(alpha = 0.1) +
-  coord_flip() +
-  theme_bw()
-ggplotly(income_dist)         
-```
 
 ## HIV diagnosis rate
 
