@@ -19,7 +19,7 @@ library(maptools)
 library(broom)
 library(httr)
 library(rgdal)
-theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5)))
+theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = element_text(hjust = 0.5, size = 12)))
 ```
 
 # 1. Background and Objectives
@@ -166,15 +166,15 @@ combine_hiv_income =
 # 4. Exploratory analysis: Visualization
 
 
-```{r message=FALSE, echo = FALSE}
+```{r message=FALSE}
 hiv_data = 
   raw_hiv %>%
   mutate(year = as.character(year), age = as.factor(age))
 ```
 
-### Gender, Neighborhood vs HIV
+### 4.1. Gender, Neighborhood vs HIV
 
-```{r fig.width = 8, fig.height = 6, echo = FALSE}
+```{r neb_plot, fig.width = 8, fig.height = 6}
 neb_plot = hiv_data %>% 
   group_by(uhf, gender) %>% 
   filter(year != "ALL", borough != "All", uhf != "All", gender != "All") %>% 
@@ -184,7 +184,7 @@ neb_plot = hiv_data %>%
   coord_flip() +
   geom_point() +
   labs(
-        title = "Gender and Neighborhood Influence on HIV Incidence",
+        title = "Figure 1.Gender and Neighborhood Influence on HIV Incidence",
         x = "Neighborhood",
         y = "HIV diagnoses",
         caption = "Data from the ..."
@@ -195,10 +195,10 @@ ggplotly(neb_plot)
 
 The number of HIV diagnoses is apperently higher among male subgroups than female in all neighborhoods. Beford Stuyvesant - Crown Heights have the highest total HIV diagnoses and highest female HIV diagnoses cases. Chelsea - Clinton ranks first in male HIV diagnoses. Bayside - Little Neck has lowest number of HIV diagnoses for both male and female.
 
-### Gender, Age vs HIV
+### 4.2. Gender, age vs HIV
 
 * Omit the data of transgender group, because the data of transgender were not divided into specific age groups.
-```{r fig.width = 8, fig.height = 6, echo = FALSE}
+```{r age_plot, fig.width = 8, fig.height = 6}
 age_plot = hiv_data %>% 
   filter(race == "All" & borough == "All" & age != "All") %>% 
   group_by(gender, age) %>% 
@@ -207,22 +207,21 @@ age_plot = hiv_data %>%
   geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
   scale_fill_brewer(palette = "Dark2") +
   labs(
-        title = "Gender and Age Influence on HIV Incidence",
+        title = "Figure 2.Gender and Age Influence on HIV Incidence",
         x = "Age range",
         y = "HIV diagnoses",
         caption = "Data from the ..."
       ) 
 
 ggplotly(age_plot)
-
 ```
 
-As is shown in the barchart above, in every age range, HIV incidence rate in male is significantly higher than that in female population. The potential explaination could be the gender differences with respect to HIV/AIDS depend on patterns of disease transmission. Most infections occurred in adults aged 20 to 29 years, and the incidence porpotion declines as the increase of age.
+As is shown in **Figure.2**, in every age range, HIV incidence rate in male is significantly higher than that in female population. The potential explaination could be the gender differences with respect to HIV/AIDS depend on patterns of disease transmission. Most infections occurred in adults aged 20 to 29 years, and the incidence porpotion declines as the increase of age.
 
 
-### Gender, Race vs HIV/mortality
+### 4.3. Gender, race vs HIV/mortality
 
-```{r fig.width = 8, fig.height = 6, echo = FALSE}
+```{r race_plot, fig.width = 8, fig.height = 6}
 race_plot = hiv_data %>% 
   filter(age == "All" & borough == "All" & race != "All") %>% 
   group_by(gender, race) %>% 
@@ -231,29 +230,27 @@ race_plot = hiv_data %>%
   geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
   scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
   labs(
-        title = "Race and Gender Influence on HIV Incidence",
+        title = "Figure 3.1 Race and Gender Influence on HIV Incidence",
         x = "Race",
         y = "HIV diagnoses",
         caption = "Data from the ..."
       ) 
 
 ggplotly(race_plot)
-
-
 ```
 
 By race/ethnicity, black men/women have the highest rates of new HIV infections among all men/women. Whereas the incidence rate among Asian/Pacific Islander is the lowest given the study population in NYC. This is because some race population groups have higher rates of HIV in their communities, thus raising the risk of new infections with each sexual or drug use encounter. Plus, social, economic, and demographic factors of various race group—such as stigma, discrimination, income, education, and geographic region—could also affect their risk for HIV. 
 
-```{r HIV-related-death_rate, fig.width = 8, fig.height = 6, echo = FALSE}
+```{r HIV-related-death-rate, fig.width = 8, fig.height = 6}
 race_plot = hiv_data %>% 
   filter(age == "All" & borough == "All" & race != "All" & hiv_related_death_rate!= 99999) %>% 
   group_by(gender, race) %>% 
   summarise(sum_hiv = sum(hiv_related_death_rate)) %>% 
   ggplot(aes(y = sum_hiv, x = reorder(race, sum_hiv), fill = gender)) + 
   geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
-  scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
+  scale_fill_manual(values = c("goldenrod3", "steelblue3")) +
   labs(
-        title = "Race and Gender Influence on HIV-related-death_rate",
+        title = "Figure 3.2 Race and Gender Influence on HIV-related-death rate",
         x = "Race",
         y = "HIV diagnoses",
         caption = "Data from the ..."
@@ -264,10 +261,9 @@ ggplotly(race_plot)
 
 However, if we compare the plot of HIV Incidence with the plot of HIV related death rate, we will notice that although the HIV incidence in male is much higher than female, the HIV related death rate in women is higher than that of men in some race, like White and Latino/Hispanic. We can draw the conclusion that women infected with HIV disease are more vulnerable than men with HIV disease. Other possible explaination could be male are more likely to get access to the HIV treatment than women, reflecting the gender inequality of social status.
 
+### 4.4. HIV diagnoses in borough with most HIV over years
 
-### HIV diagnoses in borough changes over Years
-
-```{r overall_year, echo = FALSE, fig.width = 8, fig.height = 6}
+```{r overall_year, fig.width = 8, fig.height = 6}
 overall_year = hiv_data %>%
   filter(borough == "All", uhf == "All", age == "All", race == "All") %>% 
   group_by(year, gender) %>% 
@@ -275,7 +271,7 @@ overall_year = hiv_data %>%
   ggplot(aes(x = year, y = sum_hiv, group = gender, color = gender)) +
   geom_line() +
   labs(
-        title = "Yearly change trend on HIV Incidence",
+        title = "Figure 4.Yearly change trend on HIV Incidence",
         x = "Year",
         y = "Sum of HIV diagnoses",
         caption = "Data from the ..."
@@ -283,10 +279,10 @@ overall_year = hiv_data %>%
 ggplotly(overall_year)
 ```
 
-The overall trend of total HIV incidence among study population in NYC on the decline from 2011 to 2015. The decrease in male is much significant than in female, and not very obvious in transgender group for their low base account. The downward trend in HIV incidence rate reflects the improvment of public health practice affect the HIV incidence rate through repeated exposure to counseling (such as the promotion of condom use or safe sex or other prevention messages) and the advances in HIV treatments.
+**Figure 4** shows the overall declining trend of total HIV incidence among study population in NYC from 2011 to 2015. The decrease in male is much significant than in female, and not very obvious in transgender group for their low base account. The downward trend in HIV incidence rate reflects the improvment of public health practice affect the HIV incidence rate through repeated exposure to counseling (such as the promotion of condom use or safe sex or other prevention messages) and the advances in HIV treatments.
 
 
-### Income vs hiv
+### 4.5. Income vs HIV
 
 ```{r}
 income_plot = combine_hiv_income %>% 
@@ -299,7 +295,7 @@ income_plot = combine_hiv_income %>%
   theme_bw() +
   theme(legend.position = "None") +
   labs(
-        title = "Income Influence on HIV Incidence",
+        title = "Figure 5.Income Influence on HIV Incidence",
         x = "Average income of each neighborhood",
         y = "HIV diagnoses",
         caption = "Data from the ..."
@@ -309,18 +305,16 @@ ggplotly(income_plot)
 
 **Interpretation**:
 
-According to the scatterplot of income vs HIV diagnoses, it is obvious that the points are mostly concentrated in low income neigbourhood and the number of HIV diagnoses in high average income area( > 60000/year) centered in less than 1000 cases/neigbourhood. This result is exactly what we expected, because low-income community are tend to have insufficient healthcare supply, less insurance coverage, poor education level and inadequate epidemiology awareness, which could jointly cause the relatively high HIV incidence. So, we intend to advocate the related authorities to spare more public health resource in low-to-median-income neigbourhood to raise public awareness of HIV prevention knowledge and increase budgets of medical facilities in those areas.
-
-
-
+In **Figure 5**, it is obvious that the points are mostly concentrated in low income neigbourhood and the number of HIV diagnoses in high average income area( > 60000/year) centered in less than 1000 cases/neigbourhood. This result is exactly what we expected, because low-income community are tend to have insufficient healthcare supply, less insurance coverage, poor education level and inadequate epidemiology awareness, which could jointly cause the relatively high HIV incidence. So, we intend to advocate the related authorities to spare more public health resource in low-to-median-income neigbourhood to raise public awareness of HIV prevention knowledge and increase budgets of medical facilities in those areas.
 
 **Limitations**:
 
-We can not visualize the effect of age and race at the same time.
+We can not visualize the effect of age and race simultaneously.
+
 
 # 5. Regression Analysis
 
-```{r message = FALSE, echo = FALSE}
+```{r message = FALSE}
 hiv_data_reg = raw_hiv %>% 
   rename(neighborhood = uhf) %>% 
   filter(year != "ALL", borough != "All", neighborhood != "All", gender != "All") %>% 
@@ -331,7 +325,7 @@ income_hiv = combine_hiv_income
 
 ## HIV diagnoses
 
-```{r echo = FALSE}
+```{r}
 income_hiv %>% 
   filter(year != "2011" & age != "All") %>%
   lm(hiv_diagnoses ~ borough + gender + age + mid_income, data = .) %>% 
@@ -353,7 +347,7 @@ HIV incidence among male are significantly higher than that among female, which 
 
 ## HIV related death rate
 
-```{r echo = FALSE}
+```{r}
 income_hiv %>% 
   filter(year != "2011" & age != "All" & hiv_related_death_rate != 99999) %>%
   lm(hiv_related_death_rate ~ borough + gender + age + mid_income, data = .) %>% 
