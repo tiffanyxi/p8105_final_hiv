@@ -70,7 +70,7 @@ http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_re
 
 ```{r import_data, message=FALSE}
 UHF_zipcode = 
-  read_csv("./data/appb.csv") %>% 
+  read_csv("https://raw.githubusercontent.com/tiffanyxi/tiffanyxi.github.io/master/data/appb.csv") %>% 
   slice(-43) %>% 
   select(-Borough) %>% 
   rename("UHF" = "UHF Neighborhood") %>% 
@@ -113,7 +113,7 @@ combine_hiv1 =
 ```
 
 ```{r load_income_data, warning=FALSE, message=FALSE}
-pums_raw = read_csv("./data/selected_pums.csv")
+pums_raw = read_csv("https://raw.githubusercontent.com/tiffanyxi/tiffanyxi.github.io/master/data/selected_pums.csv")
 
 temp = tempfile(fileext = ".xls")
 
