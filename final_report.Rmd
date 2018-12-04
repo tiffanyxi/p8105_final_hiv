@@ -7,6 +7,7 @@ author: Tian Li(tl2882); Huaqing Xi(hx2263); Shuwei Liu(sl4471); Yueming Kou(yk2
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(patchwork)
 library(plotly)
 library(rvest)
 library(httr)
@@ -219,7 +220,7 @@ As is shown in **Figure.2**, in every age range, HIV incidence rate in male is s
 
 ### 4.3. Gender, race vs HIV/mortality
 
-```{r race_plot, fig.width = 8, fig.height = 6}
+```{r race_plot}
 race_plot = hiv_data %>% 
   filter(age == "All" & borough == "All" & race != "All") %>% 
   group_by(gender, race) %>% 
@@ -228,18 +229,16 @@ race_plot = hiv_data %>%
   geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
   scale_fill_manual(values = c("#E69F00", "#56B4E9")) +
   labs(
-        title = "Figure 3.1 Race and Gender Influence on HIV Incidence",
+        title = "Figure 3.1 Race Influence on HIV Incidence",
         x = "Race",
         y = "HIV diagnoses"
-      ) 
-
-ggplotly(race_plot)
+      ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.9))
 ```
 
-By race/ethnicity, black men/women have the highest rates of new HIV infections among all men/women. Whereas the incidence rate among Asian/Pacific Islander is the lowest given the study population in NYC. This is because some race population groups have higher rates of HIV in their communities, thus raising the risk of new infections with each sexual or drug use encounter. Plus, social, economic, and demographic factors of various race group—such as stigma, discrimination, income, education, and geographic region—could also affect their risk for HIV. 
 
-```{r HIV-related-death-rate, fig.width = 8, fig.height = 6}
-race_plot = hiv_data %>% 
+```{r HIV-related-death-rate, fig.width = 9.6, fig.height = 6}
+race_death_plot = hiv_data %>% 
   filter(age == "All" & borough == "All" & race != "All" & hiv_related_death_rate!= 99999) %>% 
   group_by(gender, race) %>% 
   summarise(sum_hiv = sum(hiv_related_death_rate)) %>% 
@@ -247,16 +246,18 @@ race_plot = hiv_data %>%
   geom_bar(stat = "identity", alpha = 0.8, position = position_dodge()) +
   scale_fill_manual(values = c("goldenrod3", "steelblue3")) +
   labs(
-        title = "Figure 3.2 Race and Gender Influence on HIV-related-death rate",
+        title = "Figure 3.2 Race Influence on HIV-related-death rate",
         x = "Race",
-        y = "HIV diagnoses",
-        caption = "Data from the ..."
-      ) 
+        y = "HIV related death rate"
+      ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.9))
 
-ggplotly(race_plot)
+race_plot + race_death_plot
 ```
 
-However, if we compare the plot of HIV Incidence with the plot of HIV related death rate, we will notice that although the HIV incidence in male is much higher than female, the HIV related death rate in women is higher than that of men in some race, like White and Latino/Hispanic. We can draw the conclusion that women infected with HIV disease are more vulnerable than men with HIV disease. Other possible explaination could be male are more likely to get access to the HIV treatment than women, reflecting the gender inequality of social status.
+From **Figure 3.1**, by race/ethnicity, black men/women have the highest rates of new HIV infections among all men/women. Whereas the incidence rate among Asian/Pacific Islander is the lowest given the study population in NYC. This is because some race population groups have higher rates of HIV in their communities, thus raising the risk of new infections with each sexual or drug use encounter. Plus, social, economic, and demographic factors of various race group—such as stigma, discrimination, income, education, and geographic region—could also affect their risk for HIV. 
+
+However, in **Figure 3.2**, if we compare the plot of HIV Incidence with the plot of HIV related death rate, we will notice that although the HIV incidence in male is much higher than female, the HIV related death rate in women is higher than that of men in some race, like White and Latino/Hispanic. We can draw the conclusion that women infected with HIV disease are more vulnerable than men with HIV disease. Other possible explaination could be male are more likely to get access to the HIV treatment than women, reflecting the gender inequality of social status.
 
 ### 4.4. HIV diagnoses in borough with most HIV over years
 
@@ -473,7 +474,9 @@ Findings are included in the comments of each plot.
 
 **Future Direction**:
 
-We can find the HIV diagnosis situation in different places, including states, cities and towns, or even different countries, representing different level of GDP, development and lifestyle. So that the conclusion will be more comprehensive.
+We could go find less-tidy data, from which age and race can be analysed at the same time.
+
+We can find the HIV diagnosis situation in different places, including states, cities and counties, or even different countries, representing different level of GDP, development and lifestyle. So that the conclusion will be more comprehensive and generalizable. Conclusion from our study can only be applied in NYC for its uniqueness in cultural and economic aspect.
 
 Moreover, we could also include HIV diagnosis distribution during longer time period, and conduct Time Series Model analysis to better illustrate the development of HIV new cases rate.
 
