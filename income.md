@@ -5,25 +5,47 @@ income\_data\_handling
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──
+    ## -- Attaching packages --------------------------------------------------------------------------------- tidyverse 1.2.1 --
 
-    ## ✔ ggplot2 3.0.0     ✔ purrr   0.2.5
-    ## ✔ tibble  1.4.2     ✔ dplyr   0.7.8
-    ## ✔ tidyr   0.8.1     ✔ stringr 1.3.1
-    ## ✔ readr   1.1.1     ✔ forcats 0.3.0
+    ## √ ggplot2 3.0.0     √ purrr   0.2.5
+    ## √ tibble  1.4.2     √ dplyr   0.7.7
+    ## √ tidyr   0.8.1     √ stringr 1.3.1
+    ## √ readr   1.1.1     √ forcats 0.3.0
 
-    ## ── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
+    ## -- Conflicts ------------------------------------------------------------------------------------ tidyverse_conflicts() --
+    ## x dplyr::filter() masks stats::filter()
+    ## x dplyr::lag()    masks stats::lag()
 
 ``` r
-pums_raw = read.csv("./data/selected_pums.csv")  
+id1 = "1qGkhF7qXf_Qa8YTePLgqvEYfVLWX1tFs"
+pums_raw = read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id1))  
+```
 
-zcta_to_puma = readxl::read_xls("./data/zcta10_to_puma10_nyc.xls", sheet = 2) %>% 
+    ## Warning: Missing column names filled in: 'X1' [1]
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   X1 = col_integer(),
+    ##   PUMA00 = col_integer(),
+    ##   PUMA10 = col_integer(),
+    ##   ADJINC = col_integer(),
+    ##   PINCP = col_integer(),
+    ##   RAC3P05 = col_integer(),
+    ##   RAC3P12 = col_integer()
+    ## )
+
+``` r
+temp = tempfile(fileext = ".xls")
+dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls"
+download.file(dataURL, destfile=temp, mode='wb')
+
+zcta_to_puma = readxl::read_xls(temp, sheet = 2)%>% 
   select(zcta = zcta10, puma = puma10) %>% 
   mutate(puma = as.numeric(puma))
 
-zip_to_zcta = readxl::read_xls("./data/zip_to_zcta10_nyc.xls", sheet = 2) %>% 
+dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls"
+download.file(dataURL, destfile=temp, mode='wb')
+zip_to_zcta = readxl::read_xls(temp, sheet = 2) %>% 
   select(zipcode, zcta = zcta5)
 ```
 
@@ -92,6 +114,6 @@ For more info, you can check the data dictionarty "<https://www2.census.gov/prog
 
 Data from The ACS Public Use Microdata Sample files (PUMS), u can find it here "<https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=ACS_pums_csv_2011_2015&prodType=document>"
 
-This is the ZCTA10 to PUMA10 file "<http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_puma_neighborhood.xls>"
+This is the ZCTA10 to PUMA10 file "<http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls>"
 
 This thi the ZIP code to ZCTA10 file "<http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_revised.xls>"

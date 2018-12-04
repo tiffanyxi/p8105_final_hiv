@@ -21,8 +21,9 @@ theme_set(theme_bw() + theme(legend.position = "bottom") + theme(plot.title = el
 ```
 
 ```{r import_data, message=FALSE, echo = FALSE}
+id = "18ouzlI-Hs3t_DJW4rGUQwvHS0BurTmCV"
 UHF_zipcode = 
-  read_csv("./data/appb.csv") %>% 
+  read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id)) %>% 
   slice(-43) %>% 
   select(-Borough) %>% 
   rename("UHF" = "UHF Neighborhood") %>% 
@@ -65,7 +66,9 @@ combine_hiv1 =
 ```
 
 ```{r load_income_data, warning=FALSE, message=FALSE, echo = FALSE}
-pums_raw = read_csv("./data/selected_pums.csv")
+id1 = "1qGkhF7qXf_Qa8YTePLgqvEYfVLWX1tFs"
+pums_raw = read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id1))
+
 
 temp = tempfile(fileext = ".xls")
 

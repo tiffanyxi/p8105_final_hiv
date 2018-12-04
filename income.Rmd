@@ -9,7 +9,8 @@ library(tidyverse)
 
 
 ```{r add data source}
-pums_raw = read.csv("./data/selected_pums.csv")  
+id1 = "1qGkhF7qXf_Qa8YTePLgqvEYfVLWX1tFs"
+pums_raw = read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id1))  
 
 temp = tempfile(fileext = ".xls")
 dataURL <- "http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/nyc_zcta10_to_puma10.xls"

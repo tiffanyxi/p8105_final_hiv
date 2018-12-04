@@ -70,8 +70,9 @@ http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_re
 ## 3b. Data Cleaning
 
 ```{r import_data, message=FALSE}
+id = "18ouzlI-Hs3t_DJW4rGUQwvHS0BurTmCV"
 UHF_zipcode = 
-  read_csv("https://raw.githubusercontent.com/tiffanyxi/tiffanyxi.github.io/master/data/appb.csv") %>% 
+  read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id)) %>% 
   slice(-43) %>% 
   select(-Borough) %>% 
   rename("UHF" = "UHF Neighborhood") %>% 
@@ -114,7 +115,8 @@ combine_hiv1 =
 ```
 
 ```{r load_income_data, warning=FALSE, message=FALSE}
-pums_raw = read_csv("https://raw.githubusercontent.com/tiffanyxi/tiffanyxi.github.io/master/data/selected_pums.csv")
+id1 = "1qGkhF7qXf_Qa8YTePLgqvEYfVLWX1tFs"
+pums_raw = read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id1))
 
 temp = tempfile(fileext = ".xls")
 
