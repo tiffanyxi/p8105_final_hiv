@@ -71,11 +71,7 @@ http://faculty.baruch.cuny.edu/geoportal/resources/nyc_geog/zip_to_zcta10_nyc_re
 ```{r import_data, message=FALSE}
 id = "18ouzlI-Hs3t_DJW4rGUQwvHS0BurTmCV"
 UHF_zipcode = 
-<<<<<<< HEAD
   read.csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id)) %>% 
-=======
-  read_csv("https://raw.githubusercontent.com/tiffanyxi/tiffanyxi.github.io/master/data/appb.csv") %>% 
->>>>>>> 875a38e597b79d312d1eaa2d39685d67905f9ec8
   slice(-43) %>% 
   select(-Borough) %>% 
   rename("UHF" = "UHF.Neighborhood") %>% 
@@ -118,13 +114,8 @@ combine_hiv1 =
 ```
 
 ```{r load_income_data, warning=FALSE, message=FALSE}
-<<<<<<< HEAD
 id1 = "1qGkhF7qXf_Qa8YTePLgqvEYfVLWX1tFs"
-
 pums_raw = read.csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id1))
-=======
-pums_raw = read_csv("https://raw.githubusercontent.com/tiffanyxi/tiffanyxi.github.io/master/data/selected_pums.csv")
->>>>>>> 875a38e597b79d312d1eaa2d39685d67905f9ec8
 
 temp = tempfile(fileext = ".xls")
 
